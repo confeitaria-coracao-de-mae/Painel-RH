@@ -113,7 +113,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .s-ativo { background: #E8F7F1; color: var(--green); }
 .s-ferias { background: #FDF0E3; color: var(--orange); }
 .s-afastado { background: #FAEAEA; color: var(--red); }
-.s-desligado { background: #ECECEC; color: #555555; }
 
 /* ESCALA */
 .escala-wrap { overflow-x: auto; }
@@ -295,12 +294,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 
     <!-- FUNCIONÁRIAS -->
     <div class="tab-content active" id="tab-funcionarias">
-      <div class="kpi-row" style="grid-template-columns:repeat(5,1fr)">
+      <div class="kpi-row kpi-row-4">
         <div class="kpi"><div class="kpi-label">Total</div><div class="kpi-val" id="kpi-total">0</div><div class="kpi-sub">cadastradas</div></div>
         <div class="kpi"><div class="kpi-label">Ativas</div><div class="kpi-val green" id="kpi-ativas">0</div><div class="kpi-sub">em serviço</div></div>
         <div class="kpi"><div class="kpi-label">Férias</div><div class="kpi-val orange" id="kpi-ferias">0</div><div class="kpi-sub">período</div></div>
         <div class="kpi"><div class="kpi-label">Afastadas</div><div class="kpi-val red" id="kpi-afastadas">0</div><div class="kpi-sub">atestado/licença</div></div>
-        <div class="kpi"><div class="kpi-label">Desligadas</div><div class="kpi-val" style="color:#555" id="kpi-desligadas">0</div><div class="kpi-sub">ex-colaboradoras</div></div>
       </div>
       <div class="card">
         <div class="card-head">
@@ -344,7 +342,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 
     <!-- PONTO -->
     <div class="tab-content" id="tab-ponto">
-      <div class="kpi-row" style="grid-template-columns:repeat(5,1fr)">
+      <div class="kpi-row kpi-row-4">
         <div class="kpi"><div class="kpi-label">Horas previstas</div><div class="kpi-val">312h</div><div class="kpi-sub">este mês</div></div>
         <div class="kpi"><div class="kpi-label">Trabalhadas</div><div class="kpi-val green" id="kpi-horas-trab">—</div><div class="kpi-sub">até hoje</div></div>
         <div class="kpi"><div class="kpi-label">Faltas</div><div class="kpi-val red" id="kpi-faltas-ponto">0</div><div class="kpi-sub">este mês</div></div>
@@ -365,7 +363,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 
     <!-- OCORRÊNCIAS -->
     <div class="tab-content" id="tab-ocorrencias">
-      <div class="kpi-row" style="grid-template-columns:repeat(5,1fr)">
+      <div class="kpi-row kpi-row-4">
         <div class="kpi"><div class="kpi-label">Faltas</div><div class="kpi-val red" id="kpi-ocorr-faltas">0</div><div class="kpi-sub">este mês</div></div>
         <div class="kpi"><div class="kpi-label">Atrasos</div><div class="kpi-val orange" id="kpi-ocorr-atrasos">0</div><div class="kpi-sub">este mês</div></div>
         <div class="kpi"><div class="kpi-label">Advertências</div><div class="kpi-val orange" id="kpi-ocorr-advert">0</div><div class="kpi-sub">abertas</div></div>
@@ -424,7 +422,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 
     <!-- CONTAS A PAGAR -->
     <div class="tab-content" id="tab-contas">
-      <div class="kpi-row" style="grid-template-columns:repeat(5,1fr)">
+      <div class="kpi-row kpi-row-4">
         <div class="kpi"><div class="kpi-label">A pagar</div><div class="kpi-val red" id="kpi-conta-pendente">R$ —</div><div class="kpi-sub">total pendente</div></div>
         <div class="kpi"><div class="kpi-label">Vence hoje</div><div class="kpi-val red" id="kpi-conta-hoje">R$ —</div><div class="kpi-sub">urgente</div></div>
         <div class="kpi"><div class="kpi-label">Próx. 7 dias</div><div class="kpi-val orange" id="kpi-conta-semana">R$ —</div><div class="kpi-sub">a vencer</div></div>
@@ -532,12 +530,12 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
     <div class="form-row">
       <div class="form-group"><label class="form-label">Cargo</label>
         <select class="form-select" id="func-cargo">
-          <option>Confeiteiro(a)</option><option>Padeiro(a)</option><option>Salgadeiro(a)</option><option>Atendente</option><option>Caixa</option><option>Gerente</option><option>Marketing</option><option>Entregador(a)</option><option>Auxiliar de Limpeza</option>
+          <option>Confeiteira</option><option>Atendente</option><option>Caixa</option><option>Auxiliar</option><option>Gerente</option>
         </select>
       </div>
       <div class="form-group"><label class="form-label">Status</label>
         <select class="form-select" id="func-status">
-          <option value="ativo">Ativa</option><option value="ferias">Férias</option><option value="afastado">Afastada</option><option value="desligado">Desligada</option>
+          <option value="ativo">Ativa</option><option value="ferias">Férias</option><option value="afastado">Afastada</option>
         </select>
       </div>
     </div>
@@ -812,7 +810,6 @@ function renderFuncionarias() {
   document.getElementById('kpi-ativas').textContent = list.filter(f=>f.status==='ativo').length;
   document.getElementById('kpi-ferias').textContent = list.filter(f=>f.status==='ferias').length;
   document.getElementById('kpi-afastadas').textContent = list.filter(f=>f.status==='afastado').length;
-  document.getElementById('kpi-desligadas').textContent = list.filter(f=>f.status==='desligado').length;
   const grid = document.getElementById('func-grid');
   if (!list.length) {
     grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:50px;color:var(--text3)"><i class="ti ti-users" style="font-size:32px;display:block;margin-bottom:10px"></i>Nenhuma funcionária cadastrada.<br>Clique em "Nova funcionária" para começar.</div>';
@@ -825,7 +822,7 @@ function renderFuncionarias() {
       <div class="func-nome">${f.nome}</div>
       <div class="func-cargo">${f.cargo || '—'}</div>
       <div class="func-admissao">Desde ${f.admissao ? new Date(f.admissao).toLocaleDateString('pt-BR') : '—'}</div>
-      <div class="status-pill s-${f.status||'ativo'}">${f.status==='ativo'?'● Ativa':f.status==='ferias'?'● Férias':f.status==='desligado'?'● Desligada':'● Afastada'}</div>
+      <div class="status-pill s-${f.status||'ativo'}">${f.status==='ativo'?'● Ativa':f.status==='ferias'?'● Férias':'● Afastada'}</div>
     </div>`;
   }).join('');
 }
@@ -838,7 +835,7 @@ function renderEscala() {
   const seg = new Date(hoje); seg.setDate(hoje.getDate() - diaSem + 1);
   for (let i=0;i<7;i++) { const d=new Date(seg); d.setDate(seg.getDate()+i); semana.push(d); }
   document.getElementById('kpi-semana').textContent = `${semana[0].toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}–${semana[6].toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}`;
-  const funcs = DB.funcionarias.filter(f=>f.status==='ativo'||f.status==='ferias'||f.status==='afastado');
+  const funcs = DB.funcionarias.filter(f=>f.status==='ativo');
   let turnos=0, folgas=0;
   const grid = document.getElementById('escala-grid');
   let html = semana.map(d=>`<div class="eg-header">${diasSemana[d.getDay()]} ${d.getDate()}</div>`).join('');
@@ -881,7 +878,7 @@ function renderPonto() {
   const semana = [];
   const seg = new Date(hoje); seg.setDate(hoje.getDate() - hoje.getDay() + 1);
   for (let i=0;i<6;i++) { const d=new Date(seg); d.setDate(seg.getDate()+i); semana.push(d); }
-  const funcs = DB.funcionarias.filter(f=>f.status==='ativo'||f.status==='ferias'||f.status==='afastado');
+  const funcs = DB.funcionarias.filter(f=>f.status==='ativo');
   const grid = document.getElementById('ponto-grid');
   let html = '<div class="pg-header">Funcionária</div>' + semana.map(d=>`<div class="pg-header">${d.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit'})}</div>`).join('');
   funcs.forEach(f=>{
@@ -1188,7 +1185,7 @@ function buildContexto() {
   const regras = localStorage.getItem('cfg_regras') || '';
   const hoje = new Date().toLocaleDateString('pt-BR');
   const memoriaRecente = DB.memoria.slice(-8).map(m=>`[${m.data}] ${m.resumo}`).join('\n');
-  const funcsResume = DB.funcionarias.map(f=>`- ${f.nome} (${f.cargo}, ${f.status==='ativo'?'ativa':f.status==='ferias'?'férias':f.status==='desligado'?'desligada':'afastada'}, turno padrão: ${f.turno_padrao||'M'})`).join('\n');
+  const funcsResume = DB.funcionarias.map(f=>`- ${f.nome} (${f.cargo}, ${f.status==='ativo'?'ativa':f.status==='ferias'?'férias':'afastada'}, turno padrão: ${f.turno_padrao||'M'})`).join('\n');
   const mes = new Date().getMonth();
   const ocorrMes = DB.ocorrencias.filter(o=>new Date(o.data).getMonth()===mes);
   const ocorrResume = ocorrMes.map(o=>{ const f=DB.funcionarias.find(x=>x.id===o.func_id); return `- ${f?f.nome:'?'}: ${o.tipo} em ${o.data}${o.descricao?' — '+o.descricao:''}`; }).join('\n');
@@ -1224,7 +1221,7 @@ async function chamarClaude(mensagem) {
   conversaAtual.push({ role:'user', content: mensagem });
   const resp = await fetch('https://api.anthropic.com/v1/messages', {
     method:'POST',
-    headers:{ 'Content-Type':'application/json', 'x-api-key':apiKey, 'anthropic-version':'2023-06-01' },
+    headers:{ 'Content-Type':'application/json', 'x-api-key':apiKey, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
     body: JSON.stringify({
       model:'claude-sonnet-4-20250514',
       max_tokens:1000,
@@ -1250,7 +1247,7 @@ async function salvarMemoria() {
     const ultimas = conversaAtual.slice(-8).map(m=>`${m.role==='user'?'Gestor':'Agente'}: ${m.content}`).join('\n');
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method:'POST',
-      headers:{ 'Content-Type':'application/json', 'x-api-key':apiKey, 'anthropic-version':'2023-06-01' },
+      headers:{ 'Content-Type':'application/json', 'x-api-key':apiKey, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
       body: JSON.stringify({
         model:'claude-sonnet-4-20250514', max_tokens:200,
         messages:[{ role:'user', content:`Resuma em 2-3 frases objetivas o que foi tratado nesta conversa de RH:\n\n${ultimas}\n\nApenas o resumo, sem introdução.` }]
