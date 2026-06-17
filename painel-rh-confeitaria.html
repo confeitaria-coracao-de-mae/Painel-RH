@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestão Interna — Coração de Mãe</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" rel="stylesheet">
+<style>
+:root {
+  --bg: #FDF8F3;
+  --surface: #FFFFFF;
+  --surface2: #F5EFE8;
+  --border: #E8DDD2;
+  --text: #1A1208;
+  --text2: #6B5C4A;
+  --text3: #A8967E;
+  --accent: #C8622A;
+  --accent2: #F0A06A;
+  --green: #2E9E6B;
+  --blue: #3B82C4;
+  --purple: #7C5CBF;
+  --orange: #D97B20;
+  --red: #B04040;
+  --r: 10px;
+  --rg: 14px;
+  --shadow: 0 2px 16px rgba(26,18,8,0.07);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; display: flex; height: 100vh; overflow: hidden; }
+
+/* SIDEBAR */
+.sidebar {
+  width: 220px; flex-shrink: 0; background: #1A1208;
+  display: flex; flex-direction: column; overflow-y: auto;
+}
+.sidebar-brand {
+  padding: 20px 18px 16px;
+  border-bottom: 0.5px solid rgba(255,255,255,0.08);
+  margin-bottom: 8px;
+}
+.sidebar-brand-name { font-family: 'DM Serif Display', serif; font-size: 15px; color: #FDF8F3; line-height: 1.3; }
+.sidebar-brand-sub { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 2px; }
+.nav-section { font-size: 10px; color: rgba(255,255,255,0.25); letter-spacing: 1px; text-transform: uppercase; padding: 14px 18px 5px; }
+.nav-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 18px; cursor: pointer; font-size: 13px;
+  color: rgba(255,255,255,0.5); transition: all 0.15s;
+  border-left: 3px solid transparent; user-select: none;
+}
+.nav-item:hover { color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.05); }
+.nav-item.active { color: #FDF8F3; background: rgba(200,98,42,0.2); border-left-color: var(--accent); }
+.nav-item i { font-size: 16px; width: 18px; text-align: center; }
+.nav-badge { margin-left: auto; background: var(--red); color: white; font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 10px; }
+
+/* MAIN */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.topbar {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 13px 24px; display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0; gap: 12px;
+}
+.topbar-left h2 { font-family: 'DM Serif Display', serif; font-size: 18px; font-weight: 400; }
+.topbar-left p { font-size: 12px; color: var(--text3); margin-top: 1px; }
+.topbar-right { display: flex; gap: 8px; align-items: center; }
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 15px; border-radius: var(--r); font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; border: none; font-weight: 500; transition: all 0.15s; }
+.btn-primary { background: var(--accent); color: white; }
+.btn-primary:hover { background: #b5571f; }
+.btn-secondary { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+.btn-secondary:hover { background: var(--surface2); }
+.btn-danger { background: transparent; color: var(--red); border: 1px solid #FAEAEA; }
+.btn-danger:hover { background: #FAEAEA; }
+.btn-green { background: var(--green); color: white; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+
+.content { flex: 1; overflow-y: auto; padding: 22px 24px 40px; }
+
+/* KPI */
+.kpi-row { display: grid; gap: 12px; margin-bottom: 20px; }
+.kpi-row-4 { grid-template-columns: repeat(4,1fr); }
+.kpi-row-3 { grid-template-columns: repeat(3,1fr); }
+.kpi-row-2 { grid-template-columns: repeat(2,1fr); }
+.kpi { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 14px 16px; }
+.kpi-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.kpi-val { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--text); line-height: 1; }
+.kpi-val.green { color: var(--green); }
+.kpi-val.red { color: var(--red); }
+.kpi-val.orange { color: var(--orange); }
+.kpi-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+/* CARDS */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--rg); padding: 18px 20px; margin-bottom: 16px; box-shadow: var(--shadow); }
+.card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.card-title { font-weight: 600; font-size: 14px; }
+.card-action { font-size: 12px; color: var(--accent); cursor: pointer; background: none; border: none; font-family: inherit; display: flex; align-items: center; gap: 4px; }
+
+/* TABS */
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* FUNC GRID */
+.func-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+.func-card {
+  background: var(--surface2); border: 1px solid transparent; border-radius: var(--r);
+  padding: 14px; cursor: pointer; transition: all 0.15s;
+}
+.func-card:hover { border-color: var(--border); background: var(--surface); }
+.func-avatar { width: 40px; height: 40px; border-radius: 50%; background: rgba(200,98,42,0.12); display: flex; align-items: center; justify-content: center; font-family: 'DM Serif Display', serif; font-size: 15px; color: var(--accent); margin-bottom: 10px; }
+.func-nome { font-weight: 600; font-size: 13px; }
+.func-cargo { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.func-admissao { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.status-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px; margin-top: 8px; }
+.s-ativo { background: #E8F7F1; color: var(--green); }
+.s-ferias { background: #FDF0E3; color: var(--orange); }
+.s-afastado { background: #FAEAEA; color: var(--red); }
+.s-desligado { background: #ECECEC; color: #555555; }
+
+/* ESCALA */
+.escala-wrap { overflow-x: auto; }
+.escala-grid { display: grid; grid-template-columns: 130px repeat(7,1fr); gap: 3px; min-width: 560px; font-size: 11px; }
+.eg-header { background: var(--surface2); padding: 7px 6px; text-align: center; font-weight: 600; color: var(--text2); border-radius: 6px; }
+.eg-nome { background: var(--surface2); padding: 7px 10px; font-weight: 600; color: var(--text); border-radius: 6px; display: flex; align-items: center; font-size: 12px; }
+.eg-cell { border-radius: 6px; padding: 6px 4px; text-align: center; cursor: pointer; transition: opacity 0.1s; font-weight: 500; }
+.eg-cell:hover { opacity: 0.8; }
+.t-M { background: #E8F7F1; color: #1a7a50; }
+.t-T { background: #EBF2FA; color: #1e5a99; }
+.t-N { background: #F0EBF9; color: #5a3d9e; }
+.t-F { background: var(--surface2); color: var(--text3); font-weight: 400; }
+.escala-legend { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.leg-item { font-size: 11px; padding: 3px 10px; border-radius: 20px; }
+
+/* PONTO */
+.ponto-grid { display: grid; grid-template-columns: 130px repeat(6,1fr); gap: 3px; min-width: 540px; font-size: 11px; }
+.pg-header { background: var(--surface2); padding: 7px 6px; text-align: center; font-weight: 600; color: var(--text2); border-radius: 6px; }
+.pg-nome { background: var(--surface2); padding: 7px 10px; font-weight: 600; border-radius: 6px; display: flex; align-items: center; font-size: 12px; }
+.pg-cell { border-radius: 6px; padding: 6px 4px; text-align: center; background: var(--surface2); color: var(--text3); }
+.p-ok { background: #E8F7F1; color: #1a7a50; font-weight: 500; }
+.p-atraso { background: #FDF0E3; color: #a85a00; font-weight: 600; }
+.p-falta { background: #FAEAEA; color: var(--red); font-weight: 700; }
+.p-folga { background: var(--surface2); color: var(--text3); }
+
+/* OCORRÊNCIAS */
+.ocorr-list { display: flex; flex-direction: column; gap: 8px; }
+.ocorr-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; background: var(--surface2); border-radius: var(--r); }
+.ocorr-icon { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+.oi-falta { background: #FAEAEA; color: var(--red); }
+.oi-atraso { background: #FDF0E3; color: var(--orange); }
+.oi-advertencia { background: #FDF0E3; color: var(--orange); }
+.oi-elogio { background: #E8F7F1; color: var(--green); }
+.ocorr-info { flex: 1; }
+.ocorr-nome { font-weight: 600; font-size: 13px; }
+.ocorr-desc { font-size: 12px; color: var(--text2); margin-top: 2px; line-height: 1.4; }
+.ocorr-meta { font-size: 11px; color: var(--text3); margin-top: 4px; }
+.ocorr-data { font-size: 11px; color: var(--text3); flex-shrink: 0; }
+
+/* DOCS */
+.doc-cats { display: grid; grid-template-columns: repeat(6,1fr); gap: 10px; margin-bottom: 16px; }
+.doc-cat { background: var(--surface2); border: 1px solid transparent; border-radius: var(--r); padding: 14px 10px; cursor: pointer; text-align: center; transition: all 0.15s; }
+.doc-cat:hover, .doc-cat.active { border-color: var(--accent); background: var(--surface); }
+.doc-cat i { font-size: 22px; margin-bottom: 6px; color: var(--accent); display: block; }
+.doc-cat-label { font-size: 11px; font-weight: 600; color: var(--text); }
+.doc-cat-count { font-size: 10px; color: var(--text3); margin-top: 2px; }
+.doc-list { display: flex; flex-direction: column; gap: 6px; }
+.doc-item { display: flex; align-items: center; gap: 12px; padding: 11px 14px; background: var(--surface2); border-radius: var(--r); cursor: pointer; transition: all 0.12s; }
+.doc-item:hover { background: var(--surface); border: 1px solid var(--border); }
+.doc-item i { font-size: 20px; color: var(--accent); flex-shrink: 0; }
+.doc-item-info { flex: 1; }
+.doc-item-nome { font-size: 13px; font-weight: 600; }
+.doc-item-meta { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.doc-func-tag { font-size: 11px; background: var(--surface); border: 1px solid var(--border); padding: 2px 8px; border-radius: 20px; color: var(--text2); white-space: nowrap; }
+
+/* FINANCEIRO */
+.fin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.fin-table th { text-align: left; padding: 8px 10px; font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
+.fin-table td { padding: 11px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.fin-table tr:last-child td { border-bottom: none; }
+.fin-table tr:hover td { background: var(--surface2); }
+.badge { display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 20px; }
+.b-pago { background: #E8F7F1; color: var(--green); }
+.b-pendente { background: #FDF0E3; color: var(--orange); }
+.b-vence { background: #FAEAEA; color: var(--red); }
+.b-ativo { background: #E8F7F1; color: var(--green); }
+.b-inativo { background: var(--surface2); color: var(--text3); }
+
+/* ALERT */
+.alert { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: var(--r); margin-bottom: 16px; font-size: 13px; }
+.alert-warn { background: #FDF0E3; border: 1px solid rgba(217,123,32,0.25); color: #7A4810; }
+.alert-warn i { color: var(--orange); font-size: 18px; flex-shrink: 0; }
+
+/* AGENTE CHAT */
+.chat-container { display: flex; flex-direction: column; height: calc(100vh - 180px); min-height: 400px; }
+.chat-context-bar { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 14px; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ctx-badge { font-size: 11px; background: var(--surface); border: 1px solid var(--border); padding: 3px 10px; border-radius: 20px; color: var(--text2); display: flex; align-items: center; gap: 4px; }
+.ctx-badge i { font-size: 12px; color: var(--green); }
+.chat-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding: 4px 2px 12px; }
+.msg { display: flex; gap: 10px; align-items: flex-start; }
+.msg.user { flex-direction: row-reverse; }
+.msg-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.msg-avatar.ai { background: rgba(200,98,42,0.12); border: 1px solid rgba(200,98,42,0.2); }
+.msg-avatar.user { background: var(--surface2); border: 1px solid var(--border); }
+.msg-bubble { max-width: 78%; padding: 11px 15px; border-radius: 14px; font-size: 13px; line-height: 1.6; }
+.msg.ai .msg-bubble { background: var(--surface); border: 1px solid var(--border); color: var(--text); border-bottom-left-radius: 4px; }
+.msg.user .msg-bubble { background: var(--accent); color: white; border-bottom-right-radius: 4px; }
+.msg-time { font-size: 10px; color: var(--text3); margin-top: 4px; text-align: right; }
+.msg.ai .msg-time { text-align: left; }
+.typing { display: flex; gap: 4px; padding: 4px 0; }
+.typing span { width: 7px; height: 7px; border-radius: 50%; background: var(--text3); animation: bounce 1.2s infinite; }
+.typing span:nth-child(2) { animation-delay: 0.2s; }
+.typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+
+.chat-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.chip { border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px; font-size: 12px; cursor: pointer; color: var(--text2); background: var(--surface); transition: all 0.12s; white-space: nowrap; }
+.chip:hover { background: var(--surface2); border-color: var(--accent); color: var(--accent); }
+.chat-input-area { display: flex; gap: 8px; padding-top: 10px; border-top: 1px solid var(--border); }
+.chat-input { flex: 1; border: 1px solid var(--border); border-radius: var(--r); padding: 11px 14px; font-size: 13px; font-family: 'DM Sans', sans-serif; color: var(--text); background: var(--surface); outline: none; resize: none; height: 44px; }
+.chat-input:focus { border-color: var(--accent); }
+.chat-send { background: var(--accent); color: white; border: none; border-radius: var(--r); padding: 11px 16px; cursor: pointer; font-size: 15px; display: flex; align-items: center; transition: background 0.15s; }
+.chat-send:hover { background: #b5571f; }
+.chat-send:disabled { background: var(--text3); cursor: not-allowed; }
+
+/* MODAL */
+.modal-overlay { position: fixed; inset: 0; background: rgba(26,18,8,0.55); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--surface); border-radius: 16px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; padding: 28px; animation: fadeUp 0.2s ease; box-shadow: 0 8px 40px rgba(26,18,8,0.18); }
+@keyframes fadeUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.modal h3 { font-family: 'DM Serif Display', serif; font-size: 20px; margin-bottom: 20px; }
+.form-group { margin-bottom: 14px; }
+.form-label { display: block; font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+.form-input, .form-select, .form-textarea { width: 100%; border: 1px solid var(--border); border-radius: var(--r); padding: 10px 13px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text); background: var(--bg); outline: none; }
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
+.form-textarea { resize: vertical; min-height: 70px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.modal-actions { display: flex; gap: 8px; margin-top: 20px; justify-content: flex-end; }
+
+/* TOAST */
+.toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: var(--bg); padding: 12px 18px; border-radius: var(--r); font-size: 13px; z-index: 2000; transform: translateY(60px); opacity: 0; transition: all 0.3s; max-width: 300px; }
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.success { background: var(--green); }
+.toast.error { background: var(--red); }
+
+/* CONFIG */
+.config-section { margin-bottom: 20px; }
+.config-section h4 { font-weight: 600; font-size: 13px; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.config-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.config-row:last-child { border-bottom: none; }
+.config-label { font-size: 13px; font-weight: 500; }
+.config-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-brand-name">🍰 Coração de Mãe</div>
+    <div class="sidebar-brand-sub">Gestão Interna</div>
+  </div>
+
+  <div class="nav-section">Recursos Humanos</div>
+  <div class="nav-item active" onclick="goTab('funcionarias',this)"><i class="ti ti-users"></i> Funcionárias</div>
+  <div class="nav-item" onclick="goTab('escala',this)"><i class="ti ti-calendar-week"></i> Escala</div>
+  <div class="nav-item" onclick="goTab('ponto',this)"><i class="ti ti-clock"></i> Ponto</div>
+  <div class="nav-item" onclick="goTab('ocorrencias',this)"><i class="ti ti-alert-circle"></i> Ocorrências <span class="nav-badge">3</span></div>
+  <div class="nav-item" onclick="goTab('documentos',this)"><i class="ti ti-folder"></i> Documentos</div>
+
+  <div class="nav-section">Financeiro</div>
+  <div class="nav-item" onclick="goTab('fornecedores',this)"><i class="ti ti-building-store"></i> Fornecedores</div>
+  <div class="nav-item" onclick="goTab('contas',this)"><i class="ti ti-receipt"></i> Contas a Pagar <span class="nav-badge">2</span></div>
+
+  <div class="nav-section">Inteligência</div>
+  <div class="nav-item" onclick="goTab('agente',this)"><i class="ti ti-robot"></i> Agente IA</div>
+  <div class="nav-item" onclick="goTab('config',this)"><i class="ti ti-settings"></i> Configurações</div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h2 id="topbar-title">Funcionárias</h2>
+      <p id="topbar-sub">9 colaboradoras cadastradas</p>
+    </div>
+    <div class="topbar-right" id="topbar-actions">
+      <button class="btn btn-secondary" onclick="syncSheets()"><i class="ti ti-refresh"></i> Sincronizar</button>
+      <button class="btn btn-primary" id="btn-acao" onclick="abrirModalFunc()"><i class="ti ti-plus"></i> Nova funcionária</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- FUNCIONÁRIAS -->
+    <div class="tab-content active" id="tab-funcionarias">
+      <div class="kpi-row" style="grid-template-columns:repeat(5,1fr)">
+        <div class="kpi"><div class="kpi-label">Total</div><div class="kpi-val" id="kpi-total">0</div><div class="kpi-sub">cadastradas</div></div>
+        <div class="kpi"><div class="kpi-label">Ativas</div><div class="kpi-val green" id="kpi-ativas">0</div><div class="kpi-sub">em serviço</div></div>
+        <div class="kpi"><div class="kpi-label">Férias</div><div class="kpi-val orange" id="kpi-ferias">0</div><div class="kpi-sub">período</div></div>
+        <div class="kpi"><div class="kpi-label">Afastadas</div><div class="kpi-val red" id="kpi-afastadas">0</div><div class="kpi-sub">atestado/licença</div></div>
+        <div class="kpi"><div class="kpi-label">Desligadas</div><div class="kpi-val" style="color:#555" id="kpi-desligadas">0</div><div class="kpi-sub">ex-colaboradoras</div></div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Equipe completa</span>
+          <button class="card-action" onclick="abrirModalFunc()"><i class="ti ti-plus"></i> Adicionar</button>
+        </div>
+        <div class="func-grid" id="func-grid">
+          <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text3)">
+            <i class="ti ti-loader" style="font-size:28px;display:block;margin-bottom:8px"></i>
+            Carregando dados do Sheets...
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ESCALA -->
+    <div class="tab-content" id="tab-escala">
+      <div class="kpi-row kpi-row-3">
+        <div class="kpi"><div class="kpi-label">Semana atual</div><div class="kpi-val" id="kpi-semana" style="font-size:18px">—</div><div class="kpi-sub">período</div></div>
+        <div class="kpi"><div class="kpi-label">Turnos cobertos</div><div class="kpi-val green" id="kpi-turnos">—</div><div class="kpi-sub">desta semana</div></div>
+        <div class="kpi"><div class="kpi-label">Folgas</div><div class="kpi-val orange" id="kpi-folgas">—</div><div class="kpi-sub">programadas</div></div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Escala semanal</span>
+          <button class="card-action" onclick="abrirModalEscala()"><i class="ti ti-edit"></i> Editar</button>
+        </div>
+        <div class="escala-wrap">
+          <div class="escala-grid" id="escala-grid">
+            <div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--text3)">Carregando escala...</div>
+          </div>
+        </div>
+        <div class="escala-legend">
+          <span class="leg-item t-M">M = Manhã</span>
+          <span class="leg-item t-T">T = Tarde</span>
+          <span class="leg-item t-N">N = Noite</span>
+          <span class="leg-item t-F">F = Folga</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PONTO -->
+    <div class="tab-content" id="tab-ponto">
+      <div class="kpi-row" style="grid-template-columns:repeat(5,1fr)">
+        <div class="kpi"><div class="kpi-label">Horas previstas</div><div class="kpi-val">312h</div><div class="kpi-sub">este mês</div></div>
+        <div class="kpi"><div class="kpi-label">Trabalhadas</div><div class="kpi-val green" id="kpi-horas-trab">—</div><div class="kpi-sub">até hoje</div></div>
+        <div class="kpi"><div class="kpi-label">Faltas</div><div class="kpi-val red" id="kpi-faltas-ponto">0</div><div class="kpi-sub">este mês</div></div>
+        <div class="kpi"><div class="kpi-label">Atrasos</div><div class="kpi-val orange" id="kpi-atrasos-ponto">0</div><div class="kpi-sub">este mês</div></div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Registro de ponto — semana atual</span>
+          <button class="card-action" onclick="abrirModalPonto()"><i class="ti ti-plus"></i> Registrar</button>
+        </div>
+        <div class="escala-wrap">
+          <div class="ponto-grid" id="ponto-grid">
+            <div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--text3)">Carregando registros...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OCORRÊNCIAS -->
+    <div class="tab-content" id="tab-ocorrencias">
+      <div class="kpi-row" style="grid-template-columns:repeat(5,1fr)">
+        <div class="kpi"><div class="kpi-label">Faltas</div><div class="kpi-val red" id="kpi-ocorr-faltas">0</div><div class="kpi-sub">este mês</div></div>
+        <div class="kpi"><div class="kpi-label">Atrasos</div><div class="kpi-val orange" id="kpi-ocorr-atrasos">0</div><div class="kpi-sub">este mês</div></div>
+        <div class="kpi"><div class="kpi-label">Advertências</div><div class="kpi-val orange" id="kpi-ocorr-advert">0</div><div class="kpi-sub">abertas</div></div>
+        <div class="kpi"><div class="kpi-label">Elogios</div><div class="kpi-val green" id="kpi-ocorr-elogios">0</div><div class="kpi-sub">este mês</div></div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Histórico de ocorrências</span>
+          <button class="card-action" onclick="abrirModalOcorrencia()"><i class="ti ti-plus"></i> Registrar</button>
+        </div>
+        <div class="ocorr-list" id="ocorr-list">
+          <div style="text-align:center;padding:30px;color:var(--text3)">Carregando ocorrências...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DOCUMENTOS -->
+    <div class="tab-content" id="tab-documentos">
+      <div class="doc-cats" id="doc-cats">
+        <div class="doc-cat active" onclick="filtrarDocs('todos',this)"><i class="ti ti-files"></i><div class="doc-cat-label">Todos</div><div class="doc-cat-count" id="doc-count-todos">0 arquivos</div></div>
+        <div class="doc-cat" onclick="filtrarDocs('contrato',this)"><i class="ti ti-file-text"></i><div class="doc-cat-label">Contratos</div><div class="doc-cat-count" id="doc-count-contrato">0</div></div>
+        <div class="doc-cat" onclick="filtrarDocs('holerite',this)"><i class="ti ti-receipt"></i><div class="doc-cat-label">Holerites</div><div class="doc-cat-count" id="doc-count-holerite">0</div></div>
+        <div class="doc-cat" onclick="filtrarDocs('atestado',this)"><i class="ti ti-file-medical"></i><div class="doc-cat-label">Atestados</div><div class="doc-cat-count" id="doc-count-atestado">0</div></div>
+        <div class="doc-cat" onclick="filtrarDocs('exame',this)"><i class="ti ti-stethoscope"></i><div class="doc-cat-label">Exames</div><div class="doc-cat-count" id="doc-count-exame">0</div></div>
+        <div class="doc-cat" onclick="filtrarDocs('outro',this)"><i class="ti ti-file-certificate"></i><div class="doc-cat-label">Outros</div><div class="doc-cat-count" id="doc-count-outro">0</div></div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Documentos</span>
+          <button class="card-action" onclick="abrirModalDoc()"><i class="ti ti-upload"></i> Adicionar link</button>
+        </div>
+        <div class="doc-list" id="doc-list">
+          <div style="text-align:center;padding:30px;color:var(--text3)">Carregando documentos...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FORNECEDORES -->
+    <div class="tab-content" id="tab-fornecedores">
+      <div class="kpi-row kpi-row-3">
+        <div class="kpi"><div class="kpi-label">Total</div><div class="kpi-val" id="kpi-forn-total">0</div><div class="kpi-sub">cadastrados</div></div>
+        <div class="kpi"><div class="kpi-label">Ativos</div><div class="kpi-val green" id="kpi-forn-ativos">0</div><div class="kpi-sub">últimos 30 dias</div></div>
+        <div class="kpi"><div class="kpi-label">Gasto mensal</div><div class="kpi-val" id="kpi-forn-gasto">R$ —</div><div class="kpi-sub">média</div></div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Fornecedores cadastrados</span>
+          <button class="card-action" onclick="abrirModalFornecedor()"><i class="ti ti-plus"></i> Novo</button>
+        </div>
+        <table class="fin-table">
+          <thead><tr><th>Nome</th><th>Categoria</th><th>Contato</th><th>Última compra</th><th>Status</th><th></th></tr></thead>
+          <tbody id="forn-tbody"><tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text3)">Carregando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CONTAS A PAGAR -->
+    <div class="tab-content" id="tab-contas">
+      <div class="kpi-row" style="grid-template-columns:repeat(5,1fr)">
+        <div class="kpi"><div class="kpi-label">A pagar</div><div class="kpi-val red" id="kpi-conta-pendente">R$ —</div><div class="kpi-sub">total pendente</div></div>
+        <div class="kpi"><div class="kpi-label">Vence hoje</div><div class="kpi-val red" id="kpi-conta-hoje">R$ —</div><div class="kpi-sub">urgente</div></div>
+        <div class="kpi"><div class="kpi-label">Próx. 7 dias</div><div class="kpi-val orange" id="kpi-conta-semana">R$ —</div><div class="kpi-sub">a vencer</div></div>
+        <div class="kpi"><div class="kpi-label">Pago este mês</div><div class="kpi-val green" id="kpi-conta-pago">R$ —</div><div class="kpi-sub">confirmado</div></div>
+      </div>
+      <div class="alert alert-warn" id="alerta-contas" style="display:none">
+        <i class="ti ti-alert-circle"></i>
+        <span id="alerta-contas-txt"></span>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Contas a pagar</span>
+          <button class="card-action" onclick="abrirModalConta()"><i class="ti ti-plus"></i> Lançar conta</button>
+        </div>
+        <table class="fin-table">
+          <thead><tr><th>Descrição</th><th>Fornecedor</th><th>Vencimento</th><th>Valor</th><th>Status</th><th>Doc</th><th></th></tr></thead>
+          <tbody id="contas-tbody"><tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text3)">Carregando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- AGENTE IA -->
+    <div class="tab-content" id="tab-agente">
+      <div class="chat-container">
+        <div class="chat-context-bar">
+          <span style="font-size:12px;font-weight:600;color:var(--text2)">Contexto ativo:</span>
+          <span class="ctx-badge"><i class="ti ti-check"></i> Funcionárias</span>
+          <span class="ctx-badge"><i class="ti ti-check"></i> Escala</span>
+          <span class="ctx-badge"><i class="ti ti-check"></i> Ocorrências</span>
+          <span class="ctx-badge"><i class="ti ti-check"></i> Ponto</span>
+          <span class="ctx-badge"><i class="ti ti-check"></i> Contas</span>
+          <span class="ctx-badge"><i class="ti ti-check"></i> Memória</span>
+        </div>
+        <div class="chat-messages" id="chat-msgs">
+          <div class="msg ai">
+            <div class="msg-avatar ai"><i class="ti ti-robot" style="font-size:15px;color:var(--accent)"></i></div>
+            <div>
+              <div class="msg-bubble">Olá! Sou o agente de RH da Coração de Mãe. Tenho acesso aos dados das funcionárias, escala, ocorrências, ponto e financeiro. Cada conversa fica registrada na memória — vou ficando mais preciso com o tempo. O que você precisa?</div>
+              <div class="msg-time">agora</div>
+            </div>
+          </div>
+        </div>
+        <div class="chat-chips">
+          <div class="chip" onclick="enviarChip(this)">Quem trabalha amanhã?</div>
+          <div class="chip" onclick="enviarChip(this)">Resumo de ocorrências do mês</div>
+          <div class="chip" onclick="enviarChip(this)">Contas que vencem essa semana</div>
+          <div class="chip" onclick="enviarChip(this)">Gerar aviso de conduta</div>
+          <div class="chip" onclick="enviarChip(this)">Quem teve mais faltas?</div>
+          <div class="chip" onclick="enviarChip(this)">Sugerir escala semana que vem</div>
+        </div>
+        <div class="chat-input-area">
+          <input class="chat-input" id="chat-inp" placeholder="Pergunte sobre funcionárias, escala, ponto, contas..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarMsg();}">
+          <button class="chat-send" id="chat-send-btn" onclick="enviarMsg()"><i class="ti ti-send"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIGURAÇÕES -->
+    <div class="tab-content" id="tab-config">
+      <div class="card">
+        <div class="card-head"><span class="card-title">Conexão com Google Sheets</span></div>
+        <div class="config-section">
+          <div class="form-group">
+            <label class="form-label">URL do Apps Script (Web App)</label>
+            <input class="form-input" id="cfg-sheets-url" placeholder="https://script.google.com/macros/s/..." style="font-size:12px">
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="salvarConfig()"><i class="ti ti-check"></i> Salvar URL</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">Chave da API Anthropic (Claude)</span></div>
+        <div class="config-section">
+          <div class="form-group">
+            <label class="form-label">API Key</label>
+            <input class="form-input" id="cfg-api-key" type="password" placeholder="sk-ant-...">
+          </div>
+          <p style="font-size:11px;color:var(--text3);margin-bottom:10px">A chave fica salva apenas no seu navegador (localStorage). Nunca é enviada para nenhum servidor externo — vai direto para a API da Anthropic.</p>
+          <button class="btn btn-primary btn-sm" onclick="salvarConfig()"><i class="ti ti-check"></i> Salvar chave</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">Regras e contexto da empresa</span></div>
+        <div class="config-section">
+          <div class="form-group">
+            <label class="form-label">Regras internas (o agente consulta isso em toda resposta)</label>
+            <textarea class="form-textarea" id="cfg-regras" style="min-height:120px" placeholder="Ex: Turno manhã das 7h às 13h. Turno tarde das 13h às 19h. Máximo 2 faltas sem justificativa gera advertência. Desconto no salário após 3 faltas. Uniforme obrigatório no balcão..."></textarea>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="salvarConfig()"><i class="ti ti-check"></i> Salvar regras</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAIS -->
+<div class="modal-overlay" id="modal-func">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3 id="modal-func-titulo">Nova funcionária</h3>
+    <input type="hidden" id="func-id">
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Nome completo</label><input class="form-input" id="func-nome" placeholder="Nome da colaboradora"></div>
+      <div class="form-group"><label class="form-label">CPF</label><input class="form-input" id="func-cpf" placeholder="000.000.000-00"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Cargo</label>
+        <select class="form-select" id="func-cargo">
+          <option>Confeiteiro(a)</option><option>Padeiro(a)</option><option>Salgadeiro(a)</option><option>Atendente</option><option>Caixa</option><option>Gerente</option><option>Marketing</option><option>Entregador(a)</option><option>Auxiliar de Limpeza</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Status</label>
+        <select class="form-select" id="func-status">
+          <option value="ativo">Ativa</option><option value="ferias">Férias</option><option value="afastado">Afastada</option><option value="desligado">Desligada</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Data admissão</label><input class="form-input" id="func-admissao" type="date"></div>
+      <div class="form-group"><label class="form-label">Salário (R$)</label><input class="form-input" id="func-salario" type="number" placeholder="0,00"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Telefone</label><input class="form-input" id="func-tel" placeholder="(41) 99999-9999"></div>
+      <div class="form-group"><label class="form-label">Turno padrão</label>
+        <select class="form-select" id="func-turno"><option value="M">Manhã</option><option value="T">Tarde</option><option value="N">Noite</option></select>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Observações</label><textarea class="form-textarea" id="func-obs" placeholder="Informações relevantes..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="fecharModal('modal-func')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarFunc()"><i class="ti ti-check"></i> Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-ocorrencia">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>Registrar ocorrência</h3>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Funcionária</label><select class="form-select" id="ocorr-func-sel"></select></div>
+      <div class="form-group"><label class="form-label">Tipo</label>
+        <select class="form-select" id="ocorr-tipo">
+          <option value="falta">Falta</option><option value="atraso">Atraso</option><option value="advertencia">Advertência</option><option value="elogio">Elogio</option><option value="outro">Outro</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Data</label><input class="form-input" id="ocorr-data-inp" type="date"></div>
+      <div class="form-group"><label class="form-label">Turno</label>
+        <select class="form-select" id="ocorr-turno"><option>Manhã</option><option>Tarde</option><option>Noite</option><option>N/A</option></select>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Descrição</label><textarea class="form-textarea" id="ocorr-desc-inp" placeholder="Descreva a ocorrência..."></textarea></div>
+    <div class="form-group"><label class="form-label">Medida tomada</label><input class="form-input" id="ocorr-medida" placeholder="Ex: Conversa verbal, advertência escrita..."></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="fecharModal('modal-ocorrencia')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarOcorrencia()"><i class="ti ti-check"></i> Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-ponto">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>Registrar ponto</h3>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Funcionária</label><select class="form-select" id="ponto-func-sel"></select></div>
+      <div class="form-group"><label class="form-label">Data</label><input class="form-input" id="ponto-data-inp" type="date"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Entrada</label><input class="form-input" id="ponto-entrada" type="time"></div>
+      <div class="form-group"><label class="form-label">Saída</label><input class="form-input" id="ponto-saida" type="time"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Situação</label>
+      <select class="form-select" id="ponto-situacao">
+        <option value="ok">Normal</option><option value="atraso">Atraso</option><option value="falta">Falta</option><option value="folga">Folga</option>
+      </select>
+    </div>
+    <div class="form-group"><label class="form-label">Observação</label><input class="form-input" id="ponto-obs" placeholder="Opcional"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="fecharModal('modal-ponto')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarPonto()"><i class="ti ti-check"></i> Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-doc">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>Adicionar documento</h3>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Funcionária</label><select class="form-select" id="doc-func-sel"><option value="geral">— Geral —</option></select></div>
+      <div class="form-group"><label class="form-label">Categoria</label>
+        <select class="form-select" id="doc-cat-sel">
+          <option value="contrato">Contrato</option><option value="holerite">Holerite</option><option value="atestado">Atestado</option><option value="exame">Exame</option><option value="outro">Outro</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Nome do documento</label><input class="form-input" id="doc-nome" placeholder="Ex: Holerite Junho 2025"></div>
+    <div class="form-group"><label class="form-label">Link do Google Drive</label><input class="form-input" id="doc-link" placeholder="https://drive.google.com/..."></div>
+    <div class="form-group"><label class="form-label">Data</label><input class="form-input" id="doc-data-inp" type="date"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="fecharModal('modal-doc')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarDoc()"><i class="ti ti-check"></i> Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-fornecedor">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>Novo fornecedor</h3>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Nome</label><input class="form-input" id="forn-nome" placeholder="Nome do fornecedor"></div>
+      <div class="form-group"><label class="form-label">Categoria</label>
+        <select class="form-select" id="forn-cat">
+          <option>Ingredientes</option><option>Embalagens</option><option>Laticínios</option><option>Utilidades</option><option>Serviços</option><option>Outros</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Telefone</label><input class="form-input" id="forn-tel" placeholder="(41) 3322-1100"></div>
+      <div class="form-group"><label class="form-label">CNPJ</label><input class="form-input" id="forn-cnpj" placeholder="00.000.000/0000-00"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="forn-email" type="email" placeholder="fornecedor@email.com"></div>
+    <div class="form-group"><label class="form-label">Observações</label><textarea class="form-textarea" id="forn-obs" placeholder="Prazo de pagamento, condições especiais..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="fecharModal('modal-fornecedor')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarFornecedor()"><i class="ti ti-check"></i> Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-conta">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>Lançar conta</h3>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Descrição</label><input class="form-input" id="conta-desc" placeholder="Ex: Boleto energia elétrica"></div>
+      <div class="form-group"><label class="form-label">Fornecedor</label><select class="form-select" id="conta-forn-sel"><option value="">— Selecione —</option></select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Valor (R$)</label><input class="form-input" id="conta-valor" type="number" step="0.01" placeholder="0,00"></div>
+      <div class="form-group"><label class="form-label">Vencimento</label><input class="form-input" id="conta-venc" type="date"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Status</label>
+        <select class="form-select" id="conta-status"><option value="pendente">Pendente</option><option value="pago">Pago</option></select>
+      </div>
+      <div class="form-group"><label class="form-label">Link do documento</label><input class="form-input" id="conta-doc" placeholder="Link boleto/NF no Drive"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="fecharModal('modal-conta')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarConta()"><i class="ti ti-check"></i> Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// CONFIG
+// ============================================================
+const APPS_SCRIPT_URL = localStorage.getItem('cfg_sheets_url') || 'https://script.google.com/macros/s/AKfycbzAD7NsKjkMnf7AnQ0vDdSnGKWqQ3zwzoAtqnb-5_7ZY1vaPVzTDqIHrEXQY3_zKlA/exec';
+const ANTHROPIC_KEY = localStorage.getItem('cfg_api_key') || '';
+
+// Carregar config salva
+const DEFAULT_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzAD7NsKjkMnf7AnQ0vDdSnGKWqQ3zwzoAtqnb-5_7ZY1vaPVzTDqIHrEXQY3_zKlA/exec';
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Pré-preenche com a URL padrão se ainda não tiver salvo
+  if (!localStorage.getItem('cfg_sheets_url')) {
+    localStorage.setItem('cfg_sheets_url', DEFAULT_SHEETS_URL);
+  }
+  document.getElementById('cfg-sheets-url').value = localStorage.getItem('cfg_sheets_url') || DEFAULT_SHEETS_URL;
+  document.getElementById('cfg-api-key').value = localStorage.getItem('cfg_api_key') || '';
+  document.getElementById('cfg-regras').value = localStorage.getItem('cfg_regras') || 'Turno manhã: 7h às 13h. Turno tarde: 13h às 19h.\nMáximo 2 faltas injustificadas por mês gera advertência verbal.\n3 faltas gera advertência escrita e desconto em folha.\nUso de celular no balcão é proibido durante atendimento.\nUniforme obrigatório todos os dias.';
+});
+
+function salvarConfig() {
+  localStorage.setItem('cfg_sheets_url', document.getElementById('cfg-sheets-url').value.trim());
+  localStorage.setItem('cfg_api_key', document.getElementById('cfg-api-key').value.trim());
+  localStorage.setItem('cfg_regras', document.getElementById('cfg-regras').value.trim());
+  showToast('Configurações salvas', 'success');
+  // Reload dos dados
+  setTimeout(() => carregarTodos(), 500);
+}
+
+// ============================================================
+// DATA STORE (local + Sheets)
+// ============================================================
+let DB = {
+  funcionarias: JSON.parse(localStorage.getItem('db_func') || '[]'),
+  escala: JSON.parse(localStorage.getItem('db_escala') || '[]'),
+  ponto: JSON.parse(localStorage.getItem('db_ponto') || '[]'),
+  ocorrencias: JSON.parse(localStorage.getItem('db_ocorr') || '[]'),
+  documentos: JSON.parse(localStorage.getItem('db_docs') || '[]'),
+  fornecedores: JSON.parse(localStorage.getItem('db_forn') || '[]'),
+  contas: JSON.parse(localStorage.getItem('db_contas') || '[]'),
+  memoria: JSON.parse(localStorage.getItem('db_memoria') || '[]'),
+};
+
+function salvarLocal(chave) {
+  const map = {
+    funcionarias:'db_func', escala:'db_escala', ponto:'db_ponto',
+    ocorrencias:'db_ocorr', documentos:'db_docs', fornecedores:'db_forn',
+    contas:'db_contas', memoria:'db_memoria'
+  };
+  localStorage.setItem(map[chave], JSON.stringify(DB[chave]));
+}
+
+function gid() { return 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2,5); }
+
+// ============================================================
+// SHEETS SYNC
+// ============================================================
+async function syncSheets() {
+  const url = localStorage.getItem('cfg_sheets_url') || DEFAULT_SHEETS_URL;
+  if (!url) { showToast('Configure a URL do Sheets primeiro', 'error'); return; }
+  showToast('Sincronizando com Sheets...');
+  try {
+    const r = await fetch(url + '?acao=listar_tudo');
+    const json = await r.json();
+    if (json.funcionarias) { DB.funcionarias = json.funcionarias; salvarLocal('funcionarias'); }
+    if (json.ocorrencias) { DB.ocorrencias = json.ocorrencias; salvarLocal('ocorrencias'); }
+    if (json.ponto) { DB.ponto = json.ponto; salvarLocal('ponto'); }
+    if (json.documentos) { DB.documentos = json.documentos; salvarLocal('documentos'); }
+    if (json.fornecedores) { DB.fornecedores = json.fornecedores; salvarLocal('fornecedores'); }
+    if (json.contas) { DB.contas = json.contas; salvarLocal('contas'); }
+    carregarTodos();
+    showToast('Sincronizado!', 'success');
+  } catch(e) { showToast('Sheets offline — usando dados locais', 'error'); carregarTodos(); }
+}
+
+async function pushSheets(acao, dados) {
+  const url = localStorage.getItem('cfg_sheets_url') || DEFAULT_SHEETS_URL;
+  if (!url) return;
+  try {
+    await fetch(url, { method:'POST', body: JSON.stringify({ acao, ...dados }) });
+  } catch(e) { /* silencioso */ }
+}
+
+// ============================================================
+// NAV
+// ============================================================
+const TAB_CONFIG = {
+  funcionarias: { title:'Funcionárias', sub:'Equipe cadastrada', btn:'Nova funcionária', btnFn:'abrirModalFunc()' },
+  escala:       { title:'Escala Semanal', sub:'Distribuição de turnos', btn:'Editar escala', btnFn:'abrirModalEscala()' },
+  ponto:        { title:'Controle de Ponto', sub:'Registros de entrada e saída', btn:'Registrar ponto', btnFn:'abrirModalPonto()' },
+  ocorrencias:  { title:'Ocorrências', sub:'Faltas, atrasos, advertências e elogios', btn:'Registrar ocorrência', btnFn:'abrirModalOcorrencia()' },
+  documentos:   { title:'Documentos', sub:'Arquivos por funcionária', btn:'Adicionar documento', btnFn:'abrirModalDoc()' },
+  fornecedores: { title:'Fornecedores', sub:'Cadastro de fornecedores', btn:'Novo fornecedor', btnFn:'abrirModalFornecedor()' },
+  contas:       { title:'Contas a Pagar', sub:'Vencimentos e pagamentos', btn:'Lançar conta', btnFn:'abrirModalConta()' },
+  agente:       { title:'Agente de RH', sub:'Assistente com IA e memória', btn:null },
+  config:       { title:'Configurações', sub:'Sheets, API Key e regras', btn:null },
+};
+
+function goTab(key, el) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-' + key).classList.add('active');
+  el.classList.add('active');
+  const cfg = TAB_CONFIG[key];
+  document.getElementById('topbar-title').textContent = cfg.title;
+  document.getElementById('topbar-sub').textContent = cfg.sub;
+  const btn = document.getElementById('btn-acao');
+  if (cfg.btn) { btn.style.display='inline-flex'; btn.lastChild.textContent = ' ' + cfg.btn; btn.onclick = new Function(cfg.btnFn); }
+  else btn.style.display='none';
+  renderTab(key);
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+function carregarTodos() {
+  renderFuncionarias();
+  renderEscala();
+  renderPonto();
+  renderOcorrencias();
+  renderDocumentos('todos');
+  renderFornecedores();
+  renderContas();
+  popularSelects();
+}
+
+function renderFuncionarias() {
+  const list = DB.funcionarias;
+  document.getElementById('kpi-total').textContent = list.length;
+  document.getElementById('kpi-ativas').textContent = list.filter(f=>f.status==='ativo').length;
+  document.getElementById('kpi-ferias').textContent = list.filter(f=>f.status==='ferias').length;
+  document.getElementById('kpi-afastadas').textContent = list.filter(f=>f.status==='afastado').length;
+  document.getElementById('kpi-desligadas').textContent = list.filter(f=>f.status==='desligado').length;
+  const grid = document.getElementById('func-grid');
+  if (!list.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:50px;color:var(--text3)"><i class="ti ti-users" style="font-size:32px;display:block;margin-bottom:10px"></i>Nenhuma funcionária cadastrada.<br>Clique em "Nova funcionária" para começar.</div>';
+    return;
+  }
+  grid.innerHTML = list.map(f => {
+    const ini = (f.nome||'?').split(' ').map(p=>p[0]).slice(0,2).join('').toUpperCase();
+    return `<div class="func-card" onclick="editarFunc('${f.id}')">
+      <div class="func-avatar">${ini}</div>
+      <div class="func-nome">${f.nome}</div>
+      <div class="func-cargo">${f.cargo || '—'}</div>
+      <div class="func-admissao">Desde ${f.admissao ? new Date(f.admissao).toLocaleDateString('pt-BR') : '—'}</div>
+      <div class="status-pill s-${f.status||'ativo'}">${f.status==='ativo'?'● Ativa':f.status==='ferias'?'● Férias':f.status==='desligado'?'● Desligada':'● Afastada'}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderEscala() {
+  const hoje = new Date();
+  const diasSemana = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const semana = [];
+  const diaSem = hoje.getDay();
+  const seg = new Date(hoje); seg.setDate(hoje.getDate() - diaSem + 1);
+  for (let i=0;i<7;i++) { const d=new Date(seg); d.setDate(seg.getDate()+i); semana.push(d); }
+  document.getElementById('kpi-semana').textContent = `${semana[0].toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}–${semana[6].toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}`;
+  const funcs = DB.funcionarias.filter(f=>f.status==='ativo'||f.status==='ferias'||f.status==='afastado');
+  let turnos=0, folgas=0;
+  const grid = document.getElementById('escala-grid');
+  let html = semana.map(d=>`<div class="eg-header">${diasSemana[d.getDay()]} ${d.getDate()}</div>`).join('');
+  html = '<div class="eg-header">Funcionária</div>' + html;
+  funcs.forEach(f => {
+    html += `<div class="eg-nome">${f.nome.split(' ')[0]}</div>`;
+    semana.forEach(d => {
+      const ds = d.toISOString().split('T')[0];
+      const reg = DB.escala.find(e=>e.func_id===f.id && e.data===ds);
+      const t = reg ? reg.turno : (d.getDay()===0||d.getDay()===6?'F':'M');
+      if (t==='F') folgas++; else turnos++;
+      html += `<div class="eg-cell t-${t}" onclick="toggleTurno('${f.id}','${ds}','${t}')">${t==='M'?'Manhã':t==='T'?'Tarde':t==='N'?'Noite':'Folga'}</div>`;
+    });
+  });
+  grid.innerHTML = html;
+  document.getElementById('kpi-turnos').textContent = turnos;
+  document.getElementById('kpi-folgas').textContent = folgas;
+}
+
+function toggleTurno(funcId, data, atual) {
+  const ordem = ['M','T','N','F'];
+  const prox = ordem[(ordem.indexOf(atual)+1)%ordem.length];
+  const idx = DB.escala.findIndex(e=>e.func_id===funcId&&e.data===data);
+  if (idx>=0) DB.escala[idx].turno=prox; else DB.escala.push({id:gid(),func_id:funcId,data,turno:prox});
+  salvarLocal('escala');
+  pushSheets('escala_update',{func_id:funcId,data,turno:prox});
+  renderEscala();
+}
+
+function renderPonto() {
+  const mes = new Date().getMonth();
+  const faltas = DB.ponto.filter(p=>p.situacao==='falta'&&new Date(p.data).getMonth()===mes).length;
+  const atrasos = DB.ponto.filter(p=>p.situacao==='atraso'&&new Date(p.data).getMonth()===mes).length;
+  document.getElementById('kpi-faltas-ponto').textContent = faltas;
+  document.getElementById('kpi-atrasos-ponto').textContent = atrasos;
+  const horas = DB.ponto.filter(p=>p.situacao==='ok'&&new Date(p.data).getMonth()===mes).length * 6;
+  document.getElementById('kpi-horas-trab').textContent = horas + 'h';
+
+  const hoje = new Date();
+  const semana = [];
+  const seg = new Date(hoje); seg.setDate(hoje.getDate() - hoje.getDay() + 1);
+  for (let i=0;i<6;i++) { const d=new Date(seg); d.setDate(seg.getDate()+i); semana.push(d); }
+  const funcs = DB.funcionarias.filter(f=>f.status==='ativo'||f.status==='ferias'||f.status==='afastado');
+  const grid = document.getElementById('ponto-grid');
+  let html = '<div class="pg-header">Funcionária</div>' + semana.map(d=>`<div class="pg-header">${d.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit'})}</div>`).join('');
+  funcs.forEach(f=>{
+    html+=`<div class="pg-nome">${f.nome.split(' ')[0]}</div>`;
+    semana.forEach(d=>{
+      const ds=d.toISOString().split('T')[0];
+      const reg=DB.ponto.find(p=>p.func_id===f.id&&p.data===ds);
+      if(!reg) html+='<div class="pg-cell">—</div>';
+      else if(reg.situacao==='falta') html+='<div class="pg-cell p-falta">FALTA</div>';
+      else if(reg.situacao==='folga') html+='<div class="pg-cell p-folga">Folga</div>';
+      else if(reg.situacao==='atraso') html+=`<div class="pg-cell p-atraso">${reg.entrada||'Atras'}</div>`;
+      else html+=`<div class="pg-cell p-ok">${reg.entrada||'OK'}</div>`;
+    });
+  });
+  grid.innerHTML = html;
+}
+
+function renderOcorrencias() {
+  const mes = new Date().getMonth();
+  const ocorrMes = DB.ocorrencias.filter(o=>new Date(o.data).getMonth()===mes);
+  document.getElementById('kpi-ocorr-faltas').textContent = ocorrMes.filter(o=>o.tipo==='falta').length;
+  document.getElementById('kpi-ocorr-atrasos').textContent = ocorrMes.filter(o=>o.tipo==='atraso').length;
+  document.getElementById('kpi-ocorr-advert').textContent = ocorrMes.filter(o=>o.tipo==='advertencia').length;
+  document.getElementById('kpi-ocorr-elogios').textContent = ocorrMes.filter(o=>o.tipo==='elogio').length;
+  const sorted = [...DB.ocorrencias].sort((a,b)=>new Date(b.data)-new Date(a.data));
+  const list = document.getElementById('ocorr-list');
+  if(!sorted.length) { list.innerHTML='<div style="text-align:center;padding:30px;color:var(--text3)">Nenhuma ocorrência registrada.</div>'; return; }
+  const icons = {falta:'ti-x',atraso:'ti-clock',advertencia:'ti-alert-triangle',elogio:'ti-star',outro:'ti-note'};
+  const cls = {falta:'oi-falta',atraso:'oi-atraso',advertencia:'oi-advertencia',elogio:'oi-elogio',outro:'oi-atraso'};
+  list.innerHTML = sorted.slice(0,20).map(o=>{
+    const func = DB.funcionarias.find(f=>f.id===o.func_id);
+    return `<div class="ocorr-item">
+      <div class="ocorr-icon ${cls[o.tipo]||'oi-atraso'}"><i class="ti ${icons[o.tipo]||'ti-note'}"></i></div>
+      <div class="ocorr-info">
+        <div class="ocorr-nome">${func?func.nome:o.func_nome||'—'}</div>
+        <div class="ocorr-desc">${o.descricao||'—'}</div>
+        ${o.medida?`<div class="ocorr-meta">Medida: ${o.medida}</div>`:''}
+      </div>
+      <div class="ocorr-data">${o.data?new Date(o.data).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):''}</div>
+    </div>`;
+  }).join('');
+}
+
+let docFiltroAtivo = 'todos';
+function filtrarDocs(cat, el) {
+  docFiltroAtivo = cat;
+  document.querySelectorAll('.doc-cat').forEach(d=>d.classList.remove('active'));
+  el.classList.add('active');
+  renderDocumentos(cat);
+}
+
+function renderDocumentos(filtro) {
+  const cats = ['contrato','holerite','atestado','exame','outro'];
+  cats.forEach(c=>{ document.getElementById('doc-count-'+c).textContent = DB.documentos.filter(d=>d.categoria===c).length; });
+  document.getElementById('doc-count-todos').textContent = DB.documentos.length + ' arquivos';
+  const lista = filtro==='todos' ? DB.documentos : DB.documentos.filter(d=>d.categoria===filtro);
+  const sorted = [...lista].sort((a,b)=>new Date(b.data)-new Date(a.data));
+  const catIcons = {contrato:'ti-file-text',holerite:'ti-receipt',atestado:'ti-file-medical',exame:'ti-stethoscope',outro:'ti-file-certificate'};
+  const el = document.getElementById('doc-list');
+  if(!sorted.length) { el.innerHTML='<div style="text-align:center;padding:30px;color:var(--text3)">Nenhum documento nesta categoria.</div>'; return; }
+  el.innerHTML = sorted.map(d=>{
+    const func = DB.funcionarias.find(f=>f.id===d.func_id);
+    return `<div class="doc-item" onclick="${d.link?`window.open('${d.link}','_blank')`:''}">
+      <i class="ti ${catIcons[d.categoria]||'ti-file'}"></i>
+      <div class="doc-item-info">
+        <div class="doc-item-nome">${d.nome}</div>
+        <div class="doc-item-meta">${d.data?new Date(d.data).toLocaleDateString('pt-BR'):''}</div>
+      </div>
+      ${func?`<div class="doc-func-tag">${func.nome.split(' ')[0]}</div>`:''}
+      ${d.link?'<i class="ti ti-external-link" style="font-size:15px;color:var(--text3)"></i>':''}
+    </div>`;
+  }).join('');
+}
+
+function renderFornecedores() {
+  const list = DB.fornecedores;
+  document.getElementById('kpi-forn-total').textContent = list.length;
+  document.getElementById('kpi-forn-ativos').textContent = list.filter(f=>f.status==='ativo').length;
+  const tbody = document.getElementById('forn-tbody');
+  if(!list.length) { tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text3)">Nenhum fornecedor cadastrado.</td></tr>'; return; }
+  tbody.innerHTML = list.map(f=>`<tr>
+    <td style="font-weight:600">${f.nome}</td>
+    <td>${f.categoria||'—'}</td>
+    <td>${f.telefone||'—'}</td>
+    <td>${f.ultima_compra?new Date(f.ultima_compra).toLocaleDateString('pt-BR'):'—'}</td>
+    <td><span class="badge ${f.status==='ativo'?'b-ativo':'b-inativo'}">${f.status==='ativo'?'Ativo':'Inativo'}</span></td>
+    <td><button class="btn btn-secondary btn-sm" onclick="editarForn('${f.id}')"><i class="ti ti-edit"></i></button></td>
+  </tr>`).join('');
+}
+
+function renderContas() {
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const semana = new Date(hoje); semana.setDate(hoje.getDate()+7);
+  const pendentes = DB.contas.filter(c=>c.status!=='pago');
+  const totalPendente = pendentes.reduce((a,c)=>a+(parseFloat(c.valor)||0),0);
+  const venceHoje = pendentes.filter(c=>{ const d=new Date(c.vencimento); d.setHours(0,0,0,0); return d<=hoje; });
+  const venceSemana = pendentes.filter(c=>{ const d=new Date(c.vencimento); d.setHours(0,0,0,0); return d>hoje&&d<=semana; });
+  const pagos = DB.contas.filter(c=>c.status==='pago'&&new Date(c.vencimento).getMonth()===hoje.getMonth());
+  const totalPago = pagos.reduce((a,c)=>a+(parseFloat(c.valor)||0),0);
+  const totalHoje = venceHoje.reduce((a,c)=>a+(parseFloat(c.valor)||0),0);
+  const totalSemana = venceSemana.reduce((a,c)=>a+(parseFloat(c.valor)||0),0);
+  document.getElementById('kpi-conta-pendente').textContent = 'R$ '+totalPendente.toLocaleString('pt-BR',{minimumFractionDigits:2});
+  document.getElementById('kpi-conta-hoje').textContent = 'R$ '+totalHoje.toLocaleString('pt-BR',{minimumFractionDigits:2});
+  document.getElementById('kpi-conta-semana').textContent = 'R$ '+totalSemana.toLocaleString('pt-BR',{minimumFractionDigits:2});
+  document.getElementById('kpi-conta-pago').textContent = 'R$ '+totalPago.toLocaleString('pt-BR',{minimumFractionDigits:2});
+
+  const alertEl = document.getElementById('alerta-contas');
+  if(venceHoje.length) {
+    alertEl.style.display='flex';
+    document.getElementById('alerta-contas-txt').textContent = `${venceHoje.length} conta${venceHoje.length>1?'s':''} vence${venceHoje.length>1?'m':''} hoje — Total: R$ ${totalHoje.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
+  } else alertEl.style.display='none';
+
+  const sorted = [...DB.contas].sort((a,b)=>new Date(a.vencimento)-new Date(b.vencimento));
+  const tbody = document.getElementById('contas-tbody');
+  if(!sorted.length) { tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text3)">Nenhuma conta lançada.</td></tr>'; return; }
+  tbody.innerHTML = sorted.map(c=>{
+    const forn = DB.fornecedores.find(f=>f.id===c.forn_id);
+    const dVenc = new Date(c.vencimento); dVenc.setHours(0,0,0,0);
+    const isVence = c.status!=='pago' && dVenc<=hoje;
+    const badgeCls = c.status==='pago'?'b-pago':isVence?'b-vence':'b-pendente';
+    const badgeTxt = c.status==='pago'?'Pago':isVence?'Vence hoje':'Pendente';
+    return `<tr>
+      <td style="font-weight:600">${c.descricao}</td>
+      <td>${forn?forn.nome:'—'}</td>
+      <td>${c.vencimento?new Date(c.vencimento).toLocaleDateString('pt-BR'):'—'}</td>
+      <td style="font-weight:600">R$ ${parseFloat(c.valor||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+      <td><span class="badge ${badgeCls}">${badgeTxt}</span></td>
+      <td>${c.doc_link?`<a href="${c.doc_link}" target="_blank" style="color:var(--accent)"><i class="ti ti-file"></i></a>`:'—'}</td>
+      <td><button class="btn btn-secondary btn-sm" onclick="marcarPago('${c.id}')">${c.status==='pago'?'<i class="ti ti-rotate-clockwise"></i>':'<i class="ti ti-check"></i>'}</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function marcarPago(id) {
+  const idx = DB.contas.findIndex(c=>c.id===id);
+  if(idx<0) return;
+  DB.contas[idx].status = DB.contas[idx].status==='pago' ? 'pendente' : 'pago';
+  salvarLocal('contas');
+  pushSheets('conta_update',DB.contas[idx]);
+  renderContas();
+  showToast(DB.contas[idx].status==='pago'?'Marcada como paga':'Reaberta como pendente','success');
+}
+
+function renderTab(key) {
+  const renders = { funcionarias:renderFuncionarias, escala:renderEscala, ponto:renderPonto, ocorrencias:renderOcorrencias, fornecedores:renderFornecedores, contas:renderContas };
+  if(renders[key]) renders[key]();
+}
+
+function popularSelects() {
+  const funcs = DB.funcionarias;
+  ['ocorr-func-sel','ponto-func-sel','doc-func-sel'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    const prev = el.innerHTML.includes('Geral') ? '<option value="geral">— Geral —</option>' : '';
+    el.innerHTML = prev + funcs.map(f=>`<option value="${f.id}">${f.nome}</option>`).join('');
+  });
+  const contaForn = document.getElementById('conta-forn-sel');
+  if(contaForn) contaForn.innerHTML = '<option value="">— Selecione —</option>' + DB.fornecedores.map(f=>`<option value="${f.id}">${f.nome}</option>`).join('');
+}
+
+// ============================================================
+// MODAIS — ABRIR / FECHAR
+// ============================================================
+function abrirModalFunc() { document.getElementById('modal-func-titulo').textContent='Nova funcionária'; document.getElementById('func-id').value=''; ['func-nome','func-cpf','func-tel','func-obs','func-salario'].forEach(id=>document.getElementById(id).value=''); document.getElementById('func-admissao').value=new Date().toISOString().split('T')[0]; document.getElementById('modal-func').classList.add('open'); }
+function abrirModalOcorrencia() { popularSelects(); document.getElementById('ocorr-data-inp').value=new Date().toISOString().split('T')[0]; document.getElementById('modal-ocorrencia').classList.add('open'); }
+function abrirModalPonto() { popularSelects(); document.getElementById('ponto-data-inp').value=new Date().toISOString().split('T')[0]; document.getElementById('modal-ponto').classList.add('open'); }
+function abrirModalDoc() { popularSelects(); document.getElementById('doc-data-inp').value=new Date().toISOString().split('T')[0]; document.getElementById('modal-doc').classList.add('open'); }
+function abrirModalFornecedor() { ['forn-nome','forn-tel','forn-cnpj','forn-email','forn-obs'].forEach(id=>document.getElementById(id).value=''); document.getElementById('modal-fornecedor').classList.add('open'); }
+function abrirModalConta() { popularSelects(); document.getElementById('conta-venc').value=new Date().toISOString().split('T')[0]; ['conta-desc','conta-valor','conta-doc'].forEach(id=>document.getElementById(id).value=''); document.getElementById('modal-conta').classList.add('open'); }
+function abrirModalEscala() { showToast('Clique nas células da escala para trocar o turno'); }
+function fecharModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// Fechar ao clicar overlay
+document.querySelectorAll('.modal-overlay').forEach(el=>{ el.addEventListener('click',e=>{ if(e.target===el) el.classList.remove('open'); }); });
+
+// ============================================================
+// SALVAR
+// ============================================================
+function salvarFunc() {
+  const id = document.getElementById('func-id').value || gid();
+  const func = {
+    id, nome: document.getElementById('func-nome').value.trim(),
+    cpf: document.getElementById('func-cpf').value.trim(),
+    cargo: document.getElementById('func-cargo').value,
+    status: document.getElementById('func-status').value,
+    admissao: document.getElementById('func-admissao').value,
+    salario: document.getElementById('func-salario').value,
+    telefone: document.getElementById('func-tel').value.trim(),
+    turno_padrao: document.getElementById('func-turno').value,
+    obs: document.getElementById('func-obs').value.trim(),
+  };
+  if(!func.nome) { showToast('Informe o nome da funcionária','error'); return; }
+  const idx = DB.funcionarias.findIndex(f=>f.id===id);
+  if(idx>=0) DB.funcionarias[idx]=func; else DB.funcionarias.push(func);
+  salvarLocal('funcionarias'); pushSheets('func_upsert',func);
+  fecharModal('modal-func'); renderFuncionarias(); popularSelects();
+  showToast('Funcionária salva','success');
+}
+
+function editarFunc(id) {
+  const f = DB.funcionarias.find(x=>x.id===id); if(!f) return;
+  document.getElementById('modal-func-titulo').textContent='Editar funcionária';
+  document.getElementById('func-id').value=f.id;
+  document.getElementById('func-nome').value=f.nome||'';
+  document.getElementById('func-cpf').value=f.cpf||'';
+  document.getElementById('func-cargo').value=f.cargo||'Atendente';
+  document.getElementById('func-status').value=f.status||'ativo';
+  document.getElementById('func-admissao').value=f.admissao||'';
+  document.getElementById('func-salario').value=f.salario||'';
+  document.getElementById('func-tel').value=f.telefone||'';
+  document.getElementById('func-turno').value=f.turno_padrao||'M';
+  document.getElementById('func-obs').value=f.obs||'';
+  document.getElementById('modal-func').classList.add('open');
+}
+
+function salvarOcorrencia() {
+  const ocorr = {
+    id:gid(), func_id:document.getElementById('ocorr-func-sel').value,
+    tipo:document.getElementById('ocorr-tipo').value,
+    data:document.getElementById('ocorr-data-inp').value,
+    turno:document.getElementById('ocorr-turno').value,
+    descricao:document.getElementById('ocorr-desc-inp').value.trim(),
+    medida:document.getElementById('ocorr-medida').value.trim(),
+  };
+  DB.ocorrencias.unshift(ocorr); salvarLocal('ocorrencias'); pushSheets('ocorr_add',ocorr);
+  fecharModal('modal-ocorrencia'); renderOcorrencias();
+  showToast('Ocorrência registrada','success');
+}
+
+function salvarPonto() {
+  const reg = {
+    id:gid(), func_id:document.getElementById('ponto-func-sel').value,
+    data:document.getElementById('ponto-data-inp').value,
+    entrada:document.getElementById('ponto-entrada').value,
+    saida:document.getElementById('ponto-saida').value,
+    situacao:document.getElementById('ponto-situacao').value,
+    obs:document.getElementById('ponto-obs').value.trim(),
+  };
+  const idx = DB.ponto.findIndex(p=>p.func_id===reg.func_id&&p.data===reg.data);
+  if(idx>=0) DB.ponto[idx]=reg; else DB.ponto.push(reg);
+  salvarLocal('ponto'); pushSheets('ponto_upsert',reg);
+  fecharModal('modal-ponto'); renderPonto();
+  showToast('Ponto registrado','success');
+}
+
+function salvarDoc() {
+  const doc = {
+    id:gid(), func_id:document.getElementById('doc-func-sel').value,
+    categoria:document.getElementById('doc-cat-sel').value,
+    nome:document.getElementById('doc-nome').value.trim(),
+    link:document.getElementById('doc-link').value.trim(),
+    data:document.getElementById('doc-data-inp').value,
+  };
+  if(!doc.nome) { showToast('Informe o nome do documento','error'); return; }
+  DB.documentos.unshift(doc); salvarLocal('documentos'); pushSheets('doc_add',doc);
+  fecharModal('modal-doc'); renderDocumentos(docFiltroAtivo);
+  showToast('Documento adicionado','success');
+}
+
+function salvarFornecedor() {
+  const forn = {
+    id:gid(), nome:document.getElementById('forn-nome').value.trim(),
+    categoria:document.getElementById('forn-cat').value,
+    telefone:document.getElementById('forn-tel').value.trim(),
+    cnpj:document.getElementById('forn-cnpj').value.trim(),
+    email:document.getElementById('forn-email').value.trim(),
+    obs:document.getElementById('forn-obs').value.trim(),
+    status:'ativo', ultima_compra:new Date().toISOString().split('T')[0],
+  };
+  if(!forn.nome) { showToast('Informe o nome do fornecedor','error'); return; }
+  DB.fornecedores.push(forn); salvarLocal('fornecedores'); pushSheets('forn_add',forn);
+  fecharModal('modal-fornecedor'); renderFornecedores(); popularSelects();
+  showToast('Fornecedor cadastrado','success');
+}
+
+function editarForn(id) {
+  const f = DB.fornecedores.find(x=>x.id===id); if(!f) return;
+  f.status = f.status==='ativo'?'inativo':'ativo';
+  salvarLocal('fornecedores'); pushSheets('forn_update',f);
+  renderFornecedores(); showToast('Status atualizado','success');
+}
+
+function salvarConta() {
+  const conta = {
+    id:gid(), descricao:document.getElementById('conta-desc').value.trim(),
+    forn_id:document.getElementById('conta-forn-sel').value,
+    valor:document.getElementById('conta-valor').value,
+    vencimento:document.getElementById('conta-venc').value,
+    status:document.getElementById('conta-status').value,
+    doc_link:document.getElementById('conta-doc').value.trim(),
+  };
+  if(!conta.descricao||!conta.valor) { showToast('Preencha descrição e valor','error'); return; }
+  DB.contas.push(conta); salvarLocal('contas'); pushSheets('conta_add',conta);
+  fecharModal('modal-conta'); renderContas();
+  showToast('Conta lançada','success');
+}
+
+// ============================================================
+// AGENTE IA — ANTHROPIC API COM MEMÓRIA
+// ============================================================
+let conversaAtual = [];
+
+function buildContexto() {
+  const regras = localStorage.getItem('cfg_regras') || '';
+  const hoje = new Date().toLocaleDateString('pt-BR');
+  const memoriaRecente = DB.memoria.slice(-8).map(m=>`[${m.data}] ${m.resumo}`).join('\n');
+  const funcsResume = DB.funcionarias.map(f=>`- ${f.nome} (${f.cargo}, ${f.status==='ativo'?'ativa':f.status==='ferias'?'férias':f.status==='desligado'?'desligada':'afastada'}, turno padrão: ${f.turno_padrao||'M'})`).join('\n');
+  const mes = new Date().getMonth();
+  const ocorrMes = DB.ocorrencias.filter(o=>new Date(o.data).getMonth()===mes);
+  const ocorrResume = ocorrMes.map(o=>{ const f=DB.funcionarias.find(x=>x.id===o.func_id); return `- ${f?f.nome:'?'}: ${o.tipo} em ${o.data}${o.descricao?' — '+o.descricao:''}`; }).join('\n');
+  const constasPend = DB.contas.filter(c=>c.status!=='pago');
+  const contasResume = constasPend.map(c=>{ const f=DB.fornecedores.find(x=>x.id===c.forn_id); return `- ${c.descricao} (${f?f.nome:'sem fornecedor'}): R$ ${c.valor}, vence ${c.vencimento}`; }).join('\n');
+
+  return `Você é o agente de RH e gestão da Confeitaria Coração de Mãe em Curitiba/PR.
+Data de hoje: ${hoje}
+
+=== REGRAS INTERNAS DA EMPRESA ===
+${regras}
+
+=== EQUIPE (${DB.funcionarias.length} colaboradoras) ===
+${funcsResume || 'Nenhuma cadastrada ainda.'}
+
+=== OCORRÊNCIAS DESTE MÊS ===
+${ocorrResume || 'Nenhuma ocorrência registrada.'}
+
+=== CONTAS A PAGAR PENDENTES ===
+${contasResume || 'Nenhuma conta pendente.'}
+
+=== MEMÓRIA — CONVERSAS ANTERIORES ===
+${memoriaRecente || 'Nenhuma conversa anterior registrada ainda.'}
+
+Responda de forma direta, prática e em português. Quando der dicas, seja específico para a realidade de uma confeitaria pequena. Use os dados reais acima para embasar suas respostas.`;
+}
+
+async function chamarClaude(mensagem) {
+  const apiKey = localStorage.getItem('cfg_api_key');
+  if(!apiKey) {
+    return 'Configure a chave da API Claude em ⚙️ Configurações para ativar o agente com IA real.';
+  }
+  conversaAtual.push({ role:'user', content: mensagem });
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json', 'x-api-key':apiKey, 'anthropic-version':'2023-06-01' },
+    body: JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:1000,
+      system: buildContexto(),
+      messages: conversaAtual.slice(-10),
+    })
+  });
+  if(!resp.ok) { const e=await resp.json(); throw new Error(e.error?.message||'Erro na API'); }
+  const data = await resp.json();
+  const resposta = data.content[0]?.text || '—';
+  conversaAtual.push({ role:'assistant', content:resposta });
+  // Salvar memória a cada 4 trocas
+  if(conversaAtual.length % 8 === 0) {
+    await salvarMemoria();
+  }
+  return resposta;
+}
+
+async function salvarMemoria() {
+  const apiKey = localStorage.getItem('cfg_api_key');
+  if(!apiKey || conversaAtual.length < 4) return;
+  try {
+    const ultimas = conversaAtual.slice(-8).map(m=>`${m.role==='user'?'Gestor':'Agente'}: ${m.content}`).join('\n');
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'x-api-key':apiKey, 'anthropic-version':'2023-06-01' },
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514', max_tokens:200,
+        messages:[{ role:'user', content:`Resuma em 2-3 frases objetivas o que foi tratado nesta conversa de RH:\n\n${ultimas}\n\nApenas o resumo, sem introdução.` }]
+      })
+    });
+    const data = await resp.json();
+    const resumo = data.content[0]?.text || '';
+    if(resumo) {
+      DB.memoria.push({ id:gid(), data:new Date().toLocaleDateString('pt-BR'), resumo });
+      if(DB.memoria.length > 50) DB.memoria = DB.memoria.slice(-50);
+      salvarLocal('memoria');
+      pushSheets('memoria_add',{ data:new Date().toLocaleDateString('pt-BR'), resumo });
+    }
+  } catch(e) { /* silencioso */ }
+}
+
+function addMsg(texto, quem) {
+  const msgs = document.getElementById('chat-msgs');
+  const hora = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  const div = document.createElement('div');
+  div.className = 'msg ' + quem;
+  div.innerHTML = `
+    <div class="msg-avatar ${quem}">
+      ${quem==='ai'?'<i class="ti ti-robot" style="font-size:14px;color:var(--accent)"></i>':'<i class="ti ti-user" style="font-size:14px;color:var(--text2)"></i>'}
+    </div>
+    <div>
+      <div class="msg-bubble">${texto.replace(/\n/g,'<br>')}</div>
+      <div class="msg-time">${hora}</div>
+    </div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addTyping() {
+  const msgs = document.getElementById('chat-msgs');
+  const div = document.createElement('div');
+  div.className = 'msg ai'; div.id = 'typing-indicator';
+  div.innerHTML = `<div class="msg-avatar ai"><i class="ti ti-robot" style="font-size:14px;color:var(--accent)"></i></div><div class="msg-bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  msgs.appendChild(div); msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTyping() { const el=document.getElementById('typing-indicator'); if(el) el.remove(); }
+
+async function enviarMsg() {
+  const inp = document.getElementById('chat-inp');
+  const txt = inp.value.trim(); if(!txt) return;
+  inp.value='';
+  const btn = document.getElementById('chat-send-btn');
+  btn.disabled=true;
+  addMsg(txt,'user');
+  addTyping();
+  try {
+    const resposta = await chamarClaude(txt);
+    removeTyping(); addMsg(resposta,'ai');
+  } catch(e) { removeTyping(); addMsg('Erro ao conectar com a API: ' + e.message,'ai'); }
+  btn.disabled=false;
+  inp.focus();
+}
+
+function enviarChip(el) {
+  document.getElementById('chat-inp').value = el.textContent;
+  enviarMsg();
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function showToast(msg, tipo='') {
+  const t = document.getElementById('toast');
+  t.textContent=msg; t.className='toast '+(tipo==='success'?'success':tipo==='error'?'error':'');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+carregarTodos();
+const cfgUrl = localStorage.getItem('cfg_sheets_url') || DEFAULT_SHEETS_URL;
+if(cfgUrl) setTimeout(syncSheets, 1000);
+</script>
+</body>
+</html>
