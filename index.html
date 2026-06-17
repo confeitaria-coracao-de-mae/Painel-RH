@@ -1223,7 +1223,7 @@ async function chamarClaude(mensagem) {
     method:'POST',
     headers:{ 'Content-Type':'application/json', 'x-api-key':apiKey, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
     body: JSON.stringify({
-      model:'claude-sonnet-4-20250514',
+      model:'claude-sonnet-4-6',
       max_tokens:1000,
       system: buildContexto(),
       messages: conversaAtual.slice(-10),
@@ -1249,7 +1249,7 @@ async function salvarMemoria() {
       method:'POST',
       headers:{ 'Content-Type':'application/json', 'x-api-key':apiKey, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
       body: JSON.stringify({
-        model:'claude-sonnet-4-20250514', max_tokens:200,
+        model:'claude-sonnet-4-6', max_tokens:200,
         messages:[{ role:'user', content:`Resuma em 2-3 frases objetivas o que foi tratado nesta conversa de RH:\n\n${ultimas}\n\nApenas o resumo, sem introdução.` }]
       })
     });
