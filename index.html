@@ -585,7 +585,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 
 <div class="modal-overlay" id="modal-ponto">
   <div class="modal" onclick="event.stopPropagation()">
-    <h3>Registrar ponto</h3>
+    <h3 id="modal-ponto-titulo">Registrar ponto</h3>
     <div class="form-row">
       <div class="form-group"><label class="form-label">Funcionária</label><select class="form-select" id="ponto-func-sel"></select></div>
       <div class="form-group"><label class="form-label">Data</label><input class="form-input" id="ponto-data-inp" type="date"></div>
@@ -601,6 +601,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
     </div>
     <div class="form-group"><label class="form-label">Observação</label><input class="form-input" id="ponto-obs" placeholder="Opcional"></div>
     <div class="modal-actions">
+      <button class="btn btn-danger btn-sm" id="ponto-excluir-btn" style="display:none;margin-right:auto"><i class="ti ti-trash"></i> Excluir registro</button>
       <button class="btn btn-secondary" onclick="fecharModal('modal-ponto')">Cancelar</button>
       <button class="btn btn-primary" onclick="salvarPonto()"><i class="ti ti-check"></i> Salvar</button>
     </div>
@@ -688,6 +689,22 @@ const ANTHROPIC_KEY = localStorage.getItem('cfg_api_key') || '';
 // Carregar config salva
 const DEFAULT_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzAD7NsKjkMnf7AnQ0vDdSnGKWqQ3zwzoAtqnb-5_7ZY1vaPVzTDqIHrEXQY3_zKlA/exec';
 
+function mascaraCPF(v) {
+  v = v.replace(/\D/g,'').slice(0,11);
+  if(v.length > 9) return v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/,'$1.$2.$3-$4');
+  if(v.length > 6) return v.replace(/(\d{3})(\d{3})(\d{0,3})/,'$1.$2.$3');
+  if(v.length > 3) return v.replace(/(\d{3})(\d{0,3})/,'$1.$2');
+  return v;
+}
+function mascaraCNPJ(v) {
+  v = v.replace(/\D/g,'').slice(0,14);
+  if(v.length > 12) return v.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2})/,'$1.$2.$3/$4-$5');
+  if(v.length > 8)  return v.replace(/(\d{2})(\d{3})(\d{3})(\d{0,4})/,'$1.$2.$3/$4');
+  if(v.length > 5)  return v.replace(/(\d{2})(\d{3})(\d{0,3})/,'$1.$2.$3');
+  if(v.length > 2)  return v.replace(/(\d{2})(\d{0,3})/,'$1.$2');
+  return v;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   // Pré-preenche com a URL padrão se ainda não tiver salvo
   if (!localStorage.getItem('cfg_sheets_url')) {
@@ -696,6 +713,14 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('cfg-sheets-url').value = localStorage.getItem('cfg_sheets_url') || DEFAULT_SHEETS_URL;
   document.getElementById('cfg-api-key').value = localStorage.getItem('cfg_api_key') || '';
   document.getElementById('cfg-regras').value = localStorage.getItem('cfg_regras') || 'Turno manhã: 7h às 13h. Turno tarde: 13h às 19h.\nMáximo 2 faltas injustificadas por mês gera advertência verbal.\n3 faltas gera advertência escrita e desconto em folha.\nUso de celular no balcão é proibido durante atendimento.\nUniforme obrigatório todos os dias.';
+
+  // Máscaras CPF e CNPJ
+  document.getElementById('func-cpf').addEventListener('input', function() {
+    this.value = mascaraCPF(this.value);
+  });
+  document.getElementById('forn-cnpj').addEventListener('input', function() {
+    this.value = mascaraCNPJ(this.value);
+  });
 });
 
 function salvarConfig() {
@@ -886,11 +911,13 @@ function renderPonto() {
     semana.forEach(d=>{
       const ds=d.toISOString().split('T')[0];
       const reg=DB.ponto.find(p=>p.func_id===f.id&&p.data===ds);
-      if(!reg) html+='<div class="pg-cell">—</div>';
-      else if(reg.situacao==='falta') html+='<div class="pg-cell p-falta">FALTA</div>';
-      else if(reg.situacao==='folga') html+='<div class="pg-cell p-folga">Folga</div>';
-      else if(reg.situacao==='atraso') html+=`<div class="pg-cell p-atraso">${reg.entrada||'Atras'}</div>`;
-      else html+=`<div class="pg-cell p-ok">${reg.entrada||'OK'}</div>`;
+      const click=`onclick="abrirEditarPonto('${f.id}','${ds}')"`;
+      const editIcon=`<i class="ti ti-pencil" style="font-size:10px;opacity:0.4;margin-left:4px"></i>`;
+      if(!reg) html+=`<div class="pg-cell" style="cursor:pointer" ${click} title="Clique para registrar">+ reg</div>`;
+      else if(reg.situacao==='falta') html+=`<div class="pg-cell p-falta" style="cursor:pointer" ${click}>FALTA${editIcon}</div>`;
+      else if(reg.situacao==='folga') html+=`<div class="pg-cell p-folga" style="cursor:pointer" ${click}>Folga${editIcon}</div>`;
+      else if(reg.situacao==='atraso') html+=`<div class="pg-cell p-atraso" style="cursor:pointer" ${click}>${reg.entrada||'Atras'}${editIcon}</div>`;
+      else html+=`<div class="pg-cell p-ok" style="cursor:pointer" ${click}>${reg.entrada||'OK'}${editIcon}</div>`;
     });
   });
   grid.innerHTML = html;
@@ -1044,7 +1071,41 @@ function popularSelects() {
 // ============================================================
 function abrirModalFunc() { document.getElementById('modal-func-titulo').textContent='Nova funcionária'; document.getElementById('func-id').value=''; ['func-nome','func-cpf','func-tel','func-obs','func-salario'].forEach(id=>document.getElementById(id).value=''); document.getElementById('func-admissao').value=new Date().toISOString().split('T')[0]; document.getElementById('modal-func').classList.add('open'); }
 function abrirModalOcorrencia() { popularSelects(); document.getElementById('ocorr-data-inp').value=new Date().toISOString().split('T')[0]; document.getElementById('modal-ocorrencia').classList.add('open'); }
-function abrirModalPonto() { popularSelects(); document.getElementById('ponto-data-inp').value=new Date().toISOString().split('T')[0]; document.getElementById('modal-ponto').classList.add('open'); }
+function abrirModalPonto() { abrirEditarPonto(null, null); }
+function abrirEditarPonto(funcId, data) {
+  popularSelects();
+  const tituloEl = document.getElementById('modal-ponto-titulo');
+  const excluirBtn = document.getElementById('ponto-excluir-btn');
+  const reg = (funcId && data) ? DB.ponto.find(p=>p.func_id===funcId&&p.data===data) : null;
+  if(reg) {
+    tituloEl.textContent = 'Editar ponto';
+    document.getElementById('ponto-func-sel').value = reg.func_id;
+    document.getElementById('ponto-data-inp').value = reg.data;
+    document.getElementById('ponto-entrada').value = reg.entrada||'';
+    document.getElementById('ponto-saida').value = reg.saida||'';
+    document.getElementById('ponto-situacao').value = reg.situacao||'ok';
+    document.getElementById('ponto-obs').value = reg.obs||'';
+    excluirBtn.style.display = 'inline-flex';
+    excluirBtn.onclick = () => excluirPonto(reg.func_id, reg.data);
+  } else {
+    tituloEl.textContent = 'Registrar ponto';
+    document.getElementById('ponto-data-inp').value = data || new Date().toISOString().split('T')[0];
+    if(funcId) document.getElementById('ponto-func-sel').value = funcId;
+    document.getElementById('ponto-entrada').value = '';
+    document.getElementById('ponto-saida').value = '';
+    document.getElementById('ponto-situacao').value = 'ok';
+    document.getElementById('ponto-obs').value = '';
+    excluirBtn.style.display = 'none';
+  }
+  document.getElementById('modal-ponto').classList.add('open');
+}
+function excluirPonto(funcId, data) {
+  DB.ponto = DB.ponto.filter(p=>!(p.func_id===funcId&&p.data===data));
+  salvarLocal('ponto');
+  pushSheets('ponto_excluir',{func_id:funcId,data});
+  fecharModal('modal-ponto'); renderPonto();
+  showToast('Registro excluído','success');
+}
 function abrirModalDoc() { popularSelects(); document.getElementById('doc-data-inp').value=new Date().toISOString().split('T')[0]; document.getElementById('modal-doc').classList.add('open'); }
 function abrirModalFornecedor() { ['forn-nome','forn-tel','forn-cnpj','forn-email','forn-obs'].forEach(id=>document.getElementById(id).value=''); document.getElementById('modal-fornecedor').classList.add('open'); }
 function abrirModalConta() { popularSelects(); document.getElementById('conta-venc').value=new Date().toISOString().split('T')[0]; ['conta-desc','conta-valor','conta-doc'].forEach(id=>document.getElementById(id).value=''); document.getElementById('modal-conta').classList.add('open'); }
@@ -1109,15 +1170,18 @@ function salvarOcorrencia() {
 }
 
 function salvarPonto() {
+  const funcId = document.getElementById('ponto-func-sel').value;
+  const data = document.getElementById('ponto-data-inp').value;
+  const idx = DB.ponto.findIndex(p=>p.func_id===funcId&&p.data===data);
   const reg = {
-    id:gid(), func_id:document.getElementById('ponto-func-sel').value,
-    data:document.getElementById('ponto-data-inp').value,
+    id: idx>=0 ? DB.ponto[idx].id : gid(),
+    func_id: funcId,
+    data,
     entrada:document.getElementById('ponto-entrada').value,
     saida:document.getElementById('ponto-saida').value,
     situacao:document.getElementById('ponto-situacao').value,
     obs:document.getElementById('ponto-obs').value.trim(),
   };
-  const idx = DB.ponto.findIndex(p=>p.func_id===reg.func_id&&p.data===reg.data);
   if(idx>=0) DB.ponto[idx]=reg; else DB.ponto.push(reg);
   salvarLocal('ponto'); pushSheets('ponto_upsert',reg);
   fecharModal('modal-ponto'); renderPonto();
@@ -1221,9 +1285,9 @@ async function chamarClaude(mensagem) {
   conversaAtual.push({ role:'user', content: mensagem });
   const resp = await fetch('https://api.anthropic.com/v1/messages', {
     method:'POST',
-    headers:{ 'Content-Type':'application/json', 'x-api-key':apiKey, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
+    headers:{ 'Content-Type':'application/json', 'x-api-key':apiKey, 'anthropic-version':'2023-06-01' },
     body: JSON.stringify({
-      model:'claude-sonnet-4-6',
+      model:'claude-sonnet-4-20250514',
       max_tokens:1000,
       system: buildContexto(),
       messages: conversaAtual.slice(-10),
@@ -1247,9 +1311,9 @@ async function salvarMemoria() {
     const ultimas = conversaAtual.slice(-8).map(m=>`${m.role==='user'?'Gestor':'Agente'}: ${m.content}`).join('\n');
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method:'POST',
-      headers:{ 'Content-Type':'application/json', 'x-api-key':apiKey, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
+      headers:{ 'Content-Type':'application/json', 'x-api-key':apiKey, 'anthropic-version':'2023-06-01' },
       body: JSON.stringify({
-        model:'claude-sonnet-4-6', max_tokens:200,
+        model:'claude-sonnet-4-20250514', max_tokens:200,
         messages:[{ role:'user', content:`Resuma em 2-3 frases objetivas o que foi tratado nesta conversa de RH:\n\n${ultimas}\n\nApenas o resumo, sem introdução.` }]
       })
     });
