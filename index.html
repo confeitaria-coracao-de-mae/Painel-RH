@@ -658,14 +658,15 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 
 <div class="modal-overlay" id="modal-conta">
   <div class="modal" onclick="event.stopPropagation()">
-    <h3>Lançar conta</h3>
+    <h3 id="modal-conta-titulo">Lançar conta</h3>
+    <input type="hidden" id="conta-id">
     <div class="form-row">
       <div class="form-group"><label class="form-label">Descrição</label><input class="form-input" id="conta-desc" placeholder="Ex: Parcela do Carro"></div>
       <div class="form-group"><label class="form-label">Fornecedor</label><select class="form-select" id="conta-forn-sel"><option value="">— Selecione —</option></select></div>
     </div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">Valor (R$)</label><input class="form-input" id="conta-valor" type="number" step="0.01" placeholder="0,00"></div>
-      <div class="form-group"><label class="form-label">Vencimento (1ª parcela)</label><input class="form-input" id="conta-venc" type="date"></div>
+      <div class="form-group"><label class="form-label">Vencimento</label><input class="form-input" id="conta-venc" type="date"></div>
     </div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">Status</label>
@@ -688,6 +689,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       </div>
     </div>
     <div class="modal-actions">
+      <button class="btn btn-danger btn-sm" id="conta-excluir-btn" style="display:none;margin-right:auto" onclick="excluirConta()"><i class="ti ti-trash"></i> Excluir</button>
       <button class="btn btn-secondary" onclick="fecharModal('modal-conta')">Cancelar</button>
       <button class="btn btn-primary" onclick="salvarConta()"><i class="ti ti-check"></i> Salvar</button>
     </div>
@@ -1060,21 +1062,26 @@ function renderContas() {
 
   const sorted = [...DB.contas].sort((a,b)=>new Date(a.vencimento)-new Date(b.vencimento));
   const tbody = document.getElementById('contas-tbody');
-  if(!sorted.length) { tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text3)">Nenhuma conta lançada.</td></tr>'; return; }
+  if(!sorted.length) { tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text3)">Nenhuma conta lançada.</td></tr>'; return; }
   tbody.innerHTML = sorted.map(c=>{
     const forn = DB.fornecedores.find(f=>f.id===c.forn_id);
-    const dVenc = new Date(c.vencimento); dVenc.setHours(0,0,0,0);
-    const isVence = c.status!=='pago' && dVenc<=hoje;
+    const dVenc = c.vencimento ? new Date(c.vencimento) : null;
+    if(dVenc) dVenc.setHours(0,0,0,0);
+    const isVence = c.status!=='pago' && dVenc && dVenc<=hoje;
     const badgeCls = c.status==='pago'?'b-pago':isVence?'b-vence':'b-pendente';
     const badgeTxt = c.status==='pago'?'Pago':isVence?'Vence hoje':'Pendente';
+    const vencStr = dVenc && !isNaN(dVenc) ? dVenc.toLocaleDateString('pt-BR') : '—';
     return `<tr>
       <td style="font-weight:600">${c.descricao}</td>
       <td>${forn?forn.nome:'—'}</td>
-      <td>${c.vencimento?new Date(c.vencimento).toLocaleDateString('pt-BR'):'—'}</td>
+      <td>${vencStr}</td>
       <td style="font-weight:600">R$ ${parseFloat(c.valor||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
       <td><span class="badge ${badgeCls}">${badgeTxt}</span></td>
       <td>${c.doc_link?`<a href="${c.doc_link}" target="_blank" style="color:var(--accent)"><i class="ti ti-file"></i></a>`:'—'}</td>
-      <td><button class="btn btn-secondary btn-sm" onclick="marcarPago('${c.id}')">${c.status==='pago'?'<i class="ti ti-rotate-clockwise"></i>':'<i class="ti ti-check"></i>'}</button></td>
+      <td style="display:flex;gap:4px">
+        <button class="btn btn-secondary btn-sm" onclick="editarConta('${c.id}')" title="Editar"><i class="ti ti-edit"></i></button>
+        <button class="btn btn-secondary btn-sm" onclick="marcarPago('${c.id}')" title="${c.status==='pago'?'Reabrir':'Marcar pago'}">${c.status==='pago'?'<i class="ti ti-rotate-clockwise"></i>':'<i class="ti ti-check"></i>'}</button>
+      </td>
     </tr>`;
   }).join('');
 }
@@ -1189,12 +1196,43 @@ function abrirModalFornecedor() {
 }
 function abrirModalConta() {
   popularSelects();
+  document.getElementById('modal-conta-titulo').textContent = 'Lançar conta';
+  document.getElementById('conta-id').value = '';
   document.getElementById('conta-venc').value = new Date().toISOString().split('T')[0];
   ['conta-desc','conta-valor','conta-doc','conta-parcela-atual','conta-parcela-total'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('conta-status').value = 'pendente';
   document.getElementById('conta-recorrente').checked = false;
   document.getElementById('recorrencia-campos').style.display = 'none';
+  document.getElementById('conta-excluir-btn').style.display = 'none';
   document.getElementById('modal-conta').classList.add('open');
+}
+function editarConta(id) {
+  const c = DB.contas.find(x=>String(x.id)===String(id)); if(!c) return;
+  popularSelects();
+  document.getElementById('modal-conta-titulo').textContent = 'Editar conta';
+  document.getElementById('conta-id').value = c.id;
+  document.getElementById('conta-desc').value = c.desc_base || c.descricao || '';
+  document.getElementById('conta-forn-sel').value = c.forn_id || '';
+  document.getElementById('conta-valor').value = c.valor || '';
+  document.getElementById('conta-venc').value = c.vencimento || '';
+  document.getElementById('conta-status').value = c.status || 'pendente';
+  document.getElementById('conta-doc').value = c.doc_link || '';
+  const recorrente = c.recorrente === 'sim';
+  document.getElementById('conta-recorrente').checked = recorrente;
+  document.getElementById('recorrencia-campos').style.display = recorrente ? 'block' : 'none';
+  document.getElementById('conta-parcela-atual').value = c.parcela_atual || '';
+  document.getElementById('conta-parcela-total').value = c.parcela_total || '';
+  document.getElementById('conta-excluir-btn').style.display = 'inline-flex';
+  document.getElementById('modal-conta').classList.add('open');
+}
+function excluirConta() {
+  const id = document.getElementById('conta-id').value;
+  if(!confirm('Excluir esta conta?')) return;
+  DB.contas = DB.contas.filter(c=>String(c.id)!==String(id));
+  salvarLocal('contas');
+  pushSheets('conta_excluir', {id});
+  fecharModal('modal-conta'); renderContas(); atualizarBadges();
+  showToast('Conta excluída', 'success');
 }
 function abrirModalEscala() { showToast('Clique nas células da escala para trocar o turno'); }
 function fecharModal(id) { document.getElementById(id).classList.remove('open'); }
@@ -1291,17 +1329,29 @@ function salvarDoc() {
 
 function salvarFornecedor() {
   const id = document.getElementById('forn-id').value || gid();
+  const nome = document.getElementById('forn-nome').value.trim();
+  if(!nome) { showToast('Informe o nome do fornecedor','error'); return; }
+
+  // Verifica duplicado (ignora o próprio registro ao editar)
+  const duplicado = DB.fornecedores.find(f =>
+    String(f.id) !== String(id) &&
+    f.nome.toLowerCase().trim() === nome.toLowerCase().trim()
+  );
+  if(duplicado) {
+    showToast(`"${duplicado.nome}" já está cadastrado!`, 'error');
+    return;
+  }
+
   const forn = {
-    id, nome:document.getElementById('forn-nome').value.trim(),
-    categoria:document.getElementById('forn-cat').value,
-    telefone:document.getElementById('forn-tel').value.trim(),
-    cnpj:document.getElementById('forn-cnpj').value.trim(),
-    email:document.getElementById('forn-email').value.trim(),
-    obs:document.getElementById('forn-obs').value.trim(),
-    status:'ativo', ultima_compra:new Date().toISOString().split('T')[0],
+    id, nome,
+    categoria: document.getElementById('forn-cat').value,
+    telefone: document.getElementById('forn-tel').value.trim(),
+    cnpj: document.getElementById('forn-cnpj').value.trim(),
+    email: document.getElementById('forn-email').value.trim(),
+    obs: document.getElementById('forn-obs').value.trim(),
+    status: 'ativo', ultima_compra: new Date().toISOString().split('T')[0],
   };
-  if(!forn.nome) { showToast('Informe o nome do fornecedor','error'); return; }
-  const idx = DB.fornecedores.findIndex(f=>f.id===id);
+  const idx = DB.fornecedores.findIndex(f=>String(f.id)===String(id));
   if(idx>=0) { forn.status = DB.fornecedores[idx].status; forn.ultima_compra = DB.fornecedores[idx].ultima_compra; DB.fornecedores[idx]=forn; pushSheets('forn_update',forn); }
   else { DB.fornecedores.push(forn); pushSheets('forn_add',forn); }
   salvarLocal('fornecedores');
@@ -1351,13 +1401,14 @@ function toggleRecorrencia(on) {
 }
 
 function salvarConta() {
+  const idExistente = document.getElementById('conta-id').value;
   const descBase = document.getElementById('conta-desc').value.trim();
   const recorrente = document.getElementById('conta-recorrente').checked;
   const parcelaAtual = parseInt(document.getElementById('conta-parcela-atual').value) || 1;
   const parcelaTotal = parseInt(document.getElementById('conta-parcela-total').value) || 1;
   const descricao = recorrente ? `${descBase} ${parcelaAtual}/${parcelaTotal}` : descBase;
   const conta = {
-    id: gid(), descricao,
+    id: idExistente || gid(), descricao,
     desc_base: recorrente ? descBase : '',
     forn_id: document.getElementById('conta-forn-sel').value,
     valor: document.getElementById('conta-valor').value,
@@ -1369,9 +1420,12 @@ function salvarConta() {
     parcela_total: recorrente ? parcelaTotal : '',
   };
   if(!descBase || !conta.valor) { showToast('Preencha descrição e valor','error'); return; }
-  DB.contas.push(conta); salvarLocal('contas'); pushSheets('conta_add', conta);
-  fecharModal('modal-conta'); renderContas();
-  showToast('Conta lançada','success');
+  const idx = DB.contas.findIndex(c=>String(c.id)===String(conta.id));
+  if(idx>=0) { DB.contas[idx]=conta; pushSheets('conta_update', conta); }
+  else { DB.contas.push(conta); pushSheets('conta_add', conta); }
+  salvarLocal('contas');
+  fecharModal('modal-conta'); renderContas(); atualizarBadges();
+  showToast(idx>=0 ? 'Conta atualizada' : 'Conta lançada','success');
 }
 
 // ============================================================
