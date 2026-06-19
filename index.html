@@ -232,6 +232,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .modal-actions { display: flex; gap: 8px; margin-top: 20px; justify-content: flex-end; }
 
+/* FORN DROPDOWN */
+.forn-dropdown-item { padding: 9px 13px; cursor: pointer; font-size: 13px; border-bottom: 1px solid var(--border); transition: background 0.1s; }
+.forn-dropdown-item:hover { background: var(--surface2); }
+.forn-dropdown-item:last-child { border-bottom: none; }
+
 /* TOAST */
 .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: var(--bg); padding: 12px 18px; border-radius: var(--r); font-size: 13px; z-index: 2000; transform: translateY(60px); opacity: 0; transition: all 0.3s; max-width: 300px; }
 .toast.show { transform: translateY(0); opacity: 1; }
@@ -656,16 +661,31 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
   </div>
 </div>
 
+<!-- MODAL CONTA — campo fornecedor agora é buscável -->
 <div class="modal-overlay" id="modal-conta">
   <div class="modal" onclick="event.stopPropagation()">
     <h3 id="modal-conta-titulo">Lançar conta</h3>
     <input type="hidden" id="conta-id">
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Descrição</label><input class="form-input" id="conta-desc" placeholder="Ex: Parcela do Carro"></div>
-      <div class="form-group"><label class="form-label">Fornecedor</label><select class="form-select" id="conta-forn-sel"><option value="">— Selecione —</option></select></div>
+      <div class="form-group">
+        <label class="form-label">Descrição</label>
+        <input class="form-input" id="conta-desc" placeholder="Ex: Parcela do Carro">
+      </div>
+      <div class="form-group" style="position:relative">
+        <label class="form-label">Fornecedor</label>
+        <input class="form-input" id="conta-forn-busca" placeholder="Digite para buscar..." autocomplete="off"
+          oninput="filtrarFornDropdown(this.value)"
+          onfocus="abrirFornDropdown()"
+          onblur="setTimeout(fecharFornDropdown, 200)">
+        <input type="hidden" id="conta-forn-sel">
+        <div id="conta-forn-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);z-index:500;max-height:180px;overflow-y:auto;box-shadow:var(--shadow);margin-top:2px"></div>
+      </div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Valor (R$)</label><input class="form-input" id="conta-valor" type="text" inputmode="decimal" placeholder="0,00"></div>
+      <div class="form-group">
+        <label class="form-label">Valor (R$)</label>
+        <input class="form-input" id="conta-valor" type="text" inputmode="numeric" placeholder="0,00" oninput="mascaraValor(this)">
+      </div>
       <div class="form-group"><label class="form-label">Vencimento</label><input class="form-input" id="conta-venc" type="date"></div>
     </div>
     <div class="form-row">
@@ -704,8 +724,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 // ============================================================
 const APPS_SCRIPT_URL = localStorage.getItem('cfg_sheets_url') || 'https://script.google.com/macros/s/AKfycbzAD7NsKjkMnf7AnQ0vDdSnGKWqQ3zwzoAtqnb-5_7ZY1vaPVzTDqIHrEXQY3_zKlA/exec';
 const ANTHROPIC_KEY = localStorage.getItem('cfg_api_key') || '';
-
-// Carregar config salva
 const DEFAULT_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzAD7NsKjkMnf7AnQ0vDdSnGKWqQ3zwzoAtqnb-5_7ZY1vaPVzTDqIHrEXQY3_zKlA/exec';
 
 function mascaraCPF(v) {
@@ -724,8 +742,65 @@ function mascaraCNPJ(v) {
   return v;
 }
 
+// ============================================================
+// MÁSCARA MONETÁRIA BR
+// ============================================================
+function mascaraValor(el) {
+  // Remove tudo que não é dígito
+  let digits = el.value.replace(/\D/g, '');
+  if (!digits || digits === '0' || digits === '00') { el.value = ''; return; }
+  // Remove zeros à esquerda excessivos
+  digits = String(parseInt(digits, 10));
+  // Garante ao menos 3 dígitos para ter centavos
+  digits = digits.padStart(3, '0');
+  const cents = digits.slice(-2);
+  const reaisInt = parseInt(digits.slice(0, -2), 10);
+  // Formata milhar
+  const reaisStr = reaisInt.toLocaleString('pt-BR');
+  el.value = reaisStr + ',' + cents;
+}
+
+function valorBRparaFloat(str) {
+  // "1.152,35" → 1152.35  |  "114,45" → 114.45
+  if (!str) return 0;
+  return parseFloat(str.replace(/\./g, '').replace(',', '.')) || 0;
+}
+
+// ============================================================
+// DROPDOWN BUSCA FORNECEDOR (modal conta)
+// ============================================================
+function abrirFornDropdown() {
+  filtrarFornDropdown(document.getElementById('conta-forn-busca').value);
+}
+function fecharFornDropdown() {
+  const dd = document.getElementById('conta-forn-dropdown');
+  if (dd) dd.style.display = 'none';
+}
+function filtrarFornDropdown(termo) {
+  const dropdown = document.getElementById('conta-forn-dropdown');
+  const lista = DB.fornecedores
+    .filter(f => !termo || f.nome.toLowerCase().includes(termo.toLowerCase()))
+    .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+
+  if (!lista.length) {
+    dropdown.innerHTML = '<div style="padding:10px 13px;color:var(--text3);font-size:12px">Nenhum fornecedor encontrado</div>';
+  } else {
+    dropdown.innerHTML = lista.map(f =>
+      `<div class="forn-dropdown-item" onmousedown="selecionarForn('${f.id}','${f.nome.replace(/'/g, "\\'")}')">
+        ${f.nome}
+        <span style="font-size:10px;color:var(--text3);margin-left:6px">${f.categoria || ''}</span>
+      </div>`
+    ).join('');
+  }
+  dropdown.style.display = 'block';
+}
+function selecionarForn(id, nome) {
+  document.getElementById('conta-forn-sel').value = id;
+  document.getElementById('conta-forn-busca').value = nome;
+  document.getElementById('conta-forn-dropdown').style.display = 'none';
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-  // Pré-preenche com a URL padrão se ainda não tiver salvo
   if (!localStorage.getItem('cfg_sheets_url')) {
     localStorage.setItem('cfg_sheets_url', DEFAULT_SHEETS_URL);
   }
@@ -733,7 +808,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('cfg-api-key').value = localStorage.getItem('cfg_api_key') || '';
   document.getElementById('cfg-regras').value = localStorage.getItem('cfg_regras') || 'Turno manhã: 7h às 13h. Turno tarde: 13h às 19h.\nMáximo 2 faltas injustificadas por mês gera advertência verbal.\n3 faltas gera advertência escrita e desconto em folha.\nUso de celular no balcão é proibido durante atendimento.\nUniforme obrigatório todos os dias.';
 
-  // Máscaras CPF e CNPJ
   document.getElementById('func-cpf').addEventListener('input', function() {
     this.value = mascaraCPF(this.value);
   });
@@ -747,12 +821,11 @@ function salvarConfig() {
   localStorage.setItem('cfg_api_key', document.getElementById('cfg-api-key').value.trim());
   localStorage.setItem('cfg_regras', document.getElementById('cfg-regras').value.trim());
   showToast('Configurações salvas', 'success');
-  // Reload dos dados
   setTimeout(() => carregarTodos(), 500);
 }
 
 // ============================================================
-// DATA STORE (local + Sheets)
+// DATA STORE
 // ============================================================
 let DB = {
   funcionarias: JSON.parse(localStorage.getItem('db_func') || '[]'),
@@ -838,7 +911,6 @@ function goTab(key, el) {
 // RENDER
 // ============================================================
 function atualizarBadges() {
-  // Ocorrências: advertências abertas do mês atual
   const mes = new Date().getMonth();
   const ocorrMes = DB.ocorrencias.filter(o => new Date(o.data).getMonth() === mes);
   const advertencias = ocorrMes.filter(o => o.tipo === 'advertencia' || o.tipo === 'falta').length;
@@ -846,7 +918,6 @@ function atualizarBadges() {
   if (advertencias > 0) { badgeOcorr.textContent = advertencias; badgeOcorr.style.display = 'inline'; }
   else badgeOcorr.style.display = 'none';
 
-  // Contas: pendentes vencidas ou vencendo hoje
   const hoje = new Date(); hoje.setHours(0,0,0,0);
   const contasUrgentes = DB.contas.filter(c => {
     if (c.status === 'pago') return false;
@@ -1141,14 +1212,19 @@ function popularSelects() {
     const prev = el.innerHTML.includes('Geral') ? '<option value="geral">— Geral —</option>' : '';
     el.innerHTML = prev + funcs.map(f=>`<option value="${f.id}">${f.nome}</option>`).join('');
   });
-  const contaForn = document.getElementById('conta-forn-sel');
-  if(contaForn) contaForn.innerHTML = '<option value="">— Selecione —</option>' + DB.fornecedores.map(f=>`<option value="${f.id}">${f.nome}</option>`).join('');
+  // conta-forn-sel agora é input hidden com dropdown customizado
 }
 
 // ============================================================
-// MODAIS — ABRIR / FECHAR
+// MODAIS
 // ============================================================
-function abrirModalFunc() { document.getElementById('modal-func-titulo').textContent='Nova funcionária'; document.getElementById('func-id').value=''; ['func-nome','func-cpf','func-tel','func-obs','func-salario'].forEach(id=>document.getElementById(id).value=''); document.getElementById('func-admissao').value=new Date().toISOString().split('T')[0]; document.getElementById('modal-func').classList.add('open'); }
+function abrirModalFunc() {
+  document.getElementById('modal-func-titulo').textContent='Nova funcionária';
+  document.getElementById('func-id').value='';
+  ['func-nome','func-cpf','func-tel','func-obs','func-salario'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('func-admissao').value=new Date().toISOString().split('T')[0];
+  document.getElementById('modal-func').classList.add('open');
+}
 function abrirModalOcorrencia() { popularSelects(); document.getElementById('ocorr-data-inp').value=new Date().toISOString().split('T')[0]; document.getElementById('modal-ocorrencia').classList.add('open'); }
 function abrirModalPonto() { abrirEditarPonto(null, null); }
 function abrirEditarPonto(funcId, data) {
@@ -1200,6 +1276,9 @@ function abrirModalConta() {
   document.getElementById('conta-id').value = '';
   document.getElementById('conta-venc').value = new Date().toISOString().split('T')[0];
   ['conta-desc','conta-valor','conta-doc','conta-parcela-atual','conta-parcela-total'].forEach(id=>document.getElementById(id).value='');
+  // Limpa busca de fornecedor
+  document.getElementById('conta-forn-busca').value = '';
+  document.getElementById('conta-forn-sel').value = '';
   document.getElementById('conta-status').value = 'pendente';
   document.getElementById('conta-recorrente').checked = false;
   document.getElementById('recorrencia-campos').style.display = 'none';
@@ -1212,8 +1291,19 @@ function editarConta(id) {
   document.getElementById('modal-conta-titulo').textContent = 'Editar conta';
   document.getElementById('conta-id').value = c.id;
   document.getElementById('conta-desc').value = c.desc_base || c.descricao || '';
+  // Preenche campo busca fornecedor
+  const fornEdit = DB.fornecedores.find(f => f.id === c.forn_id);
   document.getElementById('conta-forn-sel').value = c.forn_id || '';
-  document.getElementById('conta-valor').value = c.valor || '';
+  document.getElementById('conta-forn-busca').value = fornEdit ? fornEdit.nome : '';
+  // Preenche valor com máscara
+  const valorNum = parseFloat(c.valor || 0);
+  const valorCents = Math.round(valorNum * 100);
+  const vStr = String(valorCents).padStart(3, '0');
+  const vCents2 = vStr.slice(-2);
+  const vReais2 = parseInt(vStr.slice(0, -2), 10);
+  document.getElementById('conta-valor').value = vReais2 > 0
+    ? vReais2.toLocaleString('pt-BR') + ',' + vCents2
+    : '0,' + vCents2;
   document.getElementById('conta-venc').value = c.vencimento || '';
   document.getElementById('conta-status').value = c.status || 'pendente';
   document.getElementById('conta-doc').value = c.doc_link || '';
@@ -1237,7 +1327,6 @@ function excluirConta() {
 function abrirModalEscala() { showToast('Clique nas células da escala para trocar o turno'); }
 function fecharModal(id) { document.getElementById(id).classList.remove('open'); }
 
-// Fechar ao clicar overlay
 document.querySelectorAll('.modal-overlay').forEach(el=>{ el.addEventListener('click',e=>{ if(e.target===el) el.classList.remove('open'); }); });
 
 // ============================================================
@@ -1300,8 +1389,7 @@ function salvarPonto() {
   const idx = DB.ponto.findIndex(p=>p.func_id===funcId&&p.data===data);
   const reg = {
     id: idx>=0 ? DB.ponto[idx].id : gid(),
-    func_id: funcId,
-    data,
+    func_id: funcId, data,
     entrada:document.getElementById('ponto-entrada').value,
     saida:document.getElementById('ponto-saida').value,
     situacao:document.getElementById('ponto-situacao').value,
@@ -1331,17 +1419,11 @@ function salvarFornecedor() {
   const id = document.getElementById('forn-id').value || gid();
   const nome = document.getElementById('forn-nome').value.trim();
   if(!nome) { showToast('Informe o nome do fornecedor','error'); return; }
-
-  // Verifica duplicado (ignora o próprio registro ao editar)
   const duplicado = DB.fornecedores.find(f =>
     String(f.id) !== String(id) &&
     f.nome.toLowerCase().trim() === nome.toLowerCase().trim()
   );
-  if(duplicado) {
-    showToast(`"${duplicado.nome}" já está cadastrado!`, 'error');
-    return;
-  }
-
+  if(duplicado) { showToast(`"${duplicado.nome}" já está cadastrado!`, 'error'); return; }
   const forn = {
     id, nome,
     categoria: document.getElementById('forn-cat').value,
@@ -1360,7 +1442,6 @@ function salvarFornecedor() {
 }
 
 function editarForn(id) {
-  // Busca por id exato, ou pelo índice se id vier como número do Sheets
   let f = DB.fornecedores.find(x=>String(x.id)===String(id));
   if(!f) return;
   document.getElementById('modal-forn-titulo').textContent = 'Editar fornecedor';
@@ -1409,9 +1490,8 @@ function salvarConta() {
   const parcelaTotal = parseInt(document.getElementById('conta-parcela-total').value) || 1;
   const descricao = recorrente ? `${descBase} ${parcelaAtual}/${parcelaTotal}` : descBase;
 
-  // Sanitiza valor: aceita tanto 415.92 quanto 415,92
-  const valorRaw = document.getElementById('conta-valor').value.trim().replace(/\./g,'').replace(',','.');
-  const valorNum = parseFloat(valorRaw);
+  // Converte valor formatado BR para float
+  const valorNum = valorBRparaFloat(document.getElementById('conta-valor').value.trim());
   if(isNaN(valorNum) || valorNum <= 0) { showToast('Valor inválido — use vírgula para centavos (ex: 415,92)','error'); return; }
 
   const conta = {
@@ -1447,8 +1527,8 @@ function buildContexto() {
   const mes = new Date().getMonth();
   const ocorrMes = DB.ocorrencias.filter(o=>new Date(o.data).getMonth()===mes);
   const ocorrResume = ocorrMes.map(o=>{ const f=DB.funcionarias.find(x=>x.id===o.func_id); return `- ${f?f.nome:'?'}: ${o.tipo} em ${o.data}${o.descricao?' — '+o.descricao:''}`; }).join('\n');
-  const constasPend = DB.contas.filter(c=>c.status!=='pago');
-  const contasResume = constasPend.map(c=>{ const f=DB.fornecedores.find(x=>x.id===c.forn_id); return `- ${c.descricao} (${f?f.nome:'sem fornecedor'}): R$ ${c.valor}, vence ${c.vencimento}`; }).join('\n');
+  const contasPend = DB.contas.filter(c=>c.status!=='pago');
+  const contasResume = contasPend.map(c=>{ const f=DB.fornecedores.find(x=>x.id===c.forn_id); return `- ${c.descricao} (${f?f.nome:'sem fornecedor'}): R$ ${c.valor}, vence ${c.vencimento}`; }).join('\n');
 
   return `Você é o agente de RH e gestão da Confeitaria Coração de Mãe em Curitiba/PR.
 Data de hoje: ${hoje}
@@ -1491,10 +1571,7 @@ async function chamarClaude(mensagem) {
   const data = await resp.json();
   const resposta = data.content[0]?.text || '—';
   conversaAtual.push({ role:'assistant', content:resposta });
-  // Salvar memória a cada 4 trocas
-  if(conversaAtual.length % 8 === 0) {
-    await salvarMemoria();
-  }
+  if(conversaAtual.length % 8 === 0) { await salvarMemoria(); }
   return resposta;
 }
 
