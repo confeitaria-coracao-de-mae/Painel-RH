@@ -265,12 +265,12 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
   <div class="nav-item active" onclick="goTab('funcionarias',this)"><i class="ti ti-users"></i> Funcionárias</div>
   <div class="nav-item" onclick="goTab('escala',this)"><i class="ti ti-calendar-week"></i> Escala</div>
   <div class="nav-item" onclick="goTab('ponto',this)"><i class="ti ti-clock"></i> Ponto</div>
-  <div class="nav-item" onclick="goTab('ocorrencias',this)"><i class="ti ti-alert-circle"></i> Ocorrências <span class="nav-badge">3</span></div>
+  <div class="nav-item" onclick="goTab('ocorrencias',this)"><i class="ti ti-alert-circle"></i> Ocorrências <span class="nav-badge" id="badge-ocorr" style="display:none"></span></div>
   <div class="nav-item" onclick="goTab('documentos',this)"><i class="ti ti-folder"></i> Documentos</div>
 
   <div class="nav-section">Financeiro</div>
   <div class="nav-item" onclick="goTab('fornecedores',this)"><i class="ti ti-building-store"></i> Fornecedores</div>
-  <div class="nav-item" onclick="goTab('contas',this)"><i class="ti ti-receipt"></i> Contas a Pagar <span class="nav-badge">2</span></div>
+  <div class="nav-item" onclick="goTab('contas',this)"><i class="ti ti-receipt"></i> Contas a Pagar <span class="nav-badge" id="badge-contas" style="display:none"></span></div>
 
   <div class="nav-section">Inteligência</div>
   <div class="nav-item" onclick="goTab('agente',this)"><i class="ti ti-robot"></i> Agente IA</div>
@@ -631,7 +631,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 
 <div class="modal-overlay" id="modal-fornecedor">
   <div class="modal" onclick="event.stopPropagation()">
-    <h3>Novo fornecedor</h3>
+    <h3 id="modal-forn-titulo">Novo fornecedor</h3>
+    <input type="hidden" id="forn-id">
     <div class="form-row">
       <div class="form-group"><label class="form-label">Nome</label><input class="form-input" id="forn-nome" placeholder="Nome do fornecedor"></div>
       <div class="form-group"><label class="form-label">Categoria</label>
@@ -647,6 +648,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
     <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="forn-email" type="email" placeholder="fornecedor@email.com"></div>
     <div class="form-group"><label class="form-label">Observações</label><textarea class="form-textarea" id="forn-obs" placeholder="Prazo de pagamento, condições especiais..."></textarea></div>
     <div class="modal-actions">
+      <button class="btn btn-danger btn-sm" id="forn-toggle-status-btn" style="display:none;margin-right:auto" onclick="toggleStatusForn()"></button>
       <button class="btn btn-secondary" onclick="fecharModal('modal-fornecedor')">Cancelar</button>
       <button class="btn btn-primary" onclick="salvarFornecedor()"><i class="ti ti-check"></i> Salvar</button>
     </div>
@@ -818,6 +820,27 @@ function goTab(key, el) {
 // ============================================================
 // RENDER
 // ============================================================
+function atualizarBadges() {
+  // Ocorrências: advertências abertas do mês atual
+  const mes = new Date().getMonth();
+  const ocorrMes = DB.ocorrencias.filter(o => new Date(o.data).getMonth() === mes);
+  const advertencias = ocorrMes.filter(o => o.tipo === 'advertencia' || o.tipo === 'falta').length;
+  const badgeOcorr = document.getElementById('badge-ocorr');
+  if (advertencias > 0) { badgeOcorr.textContent = advertencias; badgeOcorr.style.display = 'inline'; }
+  else badgeOcorr.style.display = 'none';
+
+  // Contas: pendentes vencidas ou vencendo hoje
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const contasUrgentes = DB.contas.filter(c => {
+    if (c.status === 'pago') return false;
+    const d = new Date(c.vencimento); d.setHours(0,0,0,0);
+    return d <= hoje;
+  }).length;
+  const badgeContas = document.getElementById('badge-contas');
+  if (contasUrgentes > 0) { badgeContas.textContent = contasUrgentes; badgeContas.style.display = 'inline'; }
+  else badgeContas.style.display = 'none';
+}
+
 function carregarTodos() {
   renderFuncionarias();
   renderEscala();
@@ -827,6 +850,7 @@ function carregarTodos() {
   renderFornecedores();
   renderContas();
   popularSelects();
+  atualizarBadges();
 }
 
 function renderFuncionarias() {
@@ -986,7 +1010,8 @@ function renderFornecedores() {
   document.getElementById('kpi-forn-ativos').textContent = list.filter(f=>f.status==='ativo').length;
   const tbody = document.getElementById('forn-tbody');
   if(!list.length) { tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text3)">Nenhum fornecedor cadastrado.</td></tr>'; return; }
-  tbody.innerHTML = list.map(f=>`<tr>
+  const sorted = [...list].sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR'));
+  tbody.innerHTML = sorted.map(f=>`<tr>
     <td style="font-weight:600">${f.nome}</td>
     <td>${f.categoria||'—'}</td>
     <td>${f.telefone||'—'}</td>
@@ -1107,7 +1132,13 @@ function excluirPonto(funcId, data) {
   showToast('Registro excluído','success');
 }
 function abrirModalDoc() { popularSelects(); document.getElementById('doc-data-inp').value=new Date().toISOString().split('T')[0]; document.getElementById('modal-doc').classList.add('open'); }
-function abrirModalFornecedor() { ['forn-nome','forn-tel','forn-cnpj','forn-email','forn-obs'].forEach(id=>document.getElementById(id).value=''); document.getElementById('modal-fornecedor').classList.add('open'); }
+function abrirModalFornecedor() {
+  document.getElementById('modal-forn-titulo').textContent = 'Novo fornecedor';
+  document.getElementById('forn-id').value = '';
+  ['forn-nome','forn-tel','forn-cnpj','forn-email','forn-obs'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('forn-toggle-status-btn').style.display = 'none';
+  document.getElementById('modal-fornecedor').classList.add('open');
+}
 function abrirModalConta() { popularSelects(); document.getElementById('conta-venc').value=new Date().toISOString().split('T')[0]; ['conta-desc','conta-valor','conta-doc'].forEach(id=>document.getElementById(id).value=''); document.getElementById('modal-conta').classList.add('open'); }
 function abrirModalEscala() { showToast('Clique nas células da escala para trocar o turno'); }
 function fecharModal(id) { document.getElementById(id).classList.remove('open'); }
@@ -1144,7 +1175,7 @@ function editarFunc(id) {
   document.getElementById('modal-func-titulo').textContent='Editar funcionária';
   document.getElementById('func-id').value=f.id;
   document.getElementById('func-nome').value=f.nome||'';
-  document.getElementById('func-cpf').value=f.cpf||'';
+  document.getElementById('func-cpf').value=mascaraCPF(f.cpf||'');
   document.getElementById('func-cargo').value=f.cargo||'Atendente';
   document.getElementById('func-status').value=f.status||'ativo';
   document.getElementById('func-admissao').value=f.admissao||'';
@@ -1203,8 +1234,9 @@ function salvarDoc() {
 }
 
 function salvarFornecedor() {
+  const id = document.getElementById('forn-id').value || gid();
   const forn = {
-    id:gid(), nome:document.getElementById('forn-nome').value.trim(),
+    id, nome:document.getElementById('forn-nome').value.trim(),
     categoria:document.getElementById('forn-cat').value,
     telefone:document.getElementById('forn-tel').value.trim(),
     cnpj:document.getElementById('forn-cnpj').value.trim(),
@@ -1213,16 +1245,36 @@ function salvarFornecedor() {
     status:'ativo', ultima_compra:new Date().toISOString().split('T')[0],
   };
   if(!forn.nome) { showToast('Informe o nome do fornecedor','error'); return; }
-  DB.fornecedores.push(forn); salvarLocal('fornecedores'); pushSheets('forn_add',forn);
+  const idx = DB.fornecedores.findIndex(f=>f.id===id);
+  if(idx>=0) { forn.status = DB.fornecedores[idx].status; forn.ultima_compra = DB.fornecedores[idx].ultima_compra; DB.fornecedores[idx]=forn; pushSheets('forn_update',forn); }
+  else { DB.fornecedores.push(forn); pushSheets('forn_add',forn); }
+  salvarLocal('fornecedores');
   fecharModal('modal-fornecedor'); renderFornecedores(); popularSelects();
-  showToast('Fornecedor cadastrado','success');
+  showToast('Fornecedor salvo','success');
 }
 
 function editarForn(id) {
   const f = DB.fornecedores.find(x=>x.id===id); if(!f) return;
-  f.status = f.status==='ativo'?'inativo':'ativo';
-  salvarLocal('fornecedores'); pushSheets('forn_update',f);
-  renderFornecedores(); showToast('Status atualizado','success');
+  document.getElementById('modal-forn-titulo').textContent = 'Editar fornecedor';
+  document.getElementById('forn-id').value = f.id;
+  document.getElementById('forn-nome').value = f.nome||'';
+  document.getElementById('forn-cat').value = f.categoria||'Ingredientes';
+  document.getElementById('forn-tel').value = f.telefone||'';
+  document.getElementById('forn-cnpj').value = mascaraCNPJ(f.cnpj||'');
+  document.getElementById('forn-email').value = f.email||'';
+  document.getElementById('forn-obs').value = f.obs||'';
+  const statusBtn = document.getElementById('forn-toggle-status-btn');
+  statusBtn.style.display = 'inline-flex';
+  statusBtn.innerHTML = f.status==='ativo' ? '<i class="ti ti-ban"></i> Inativar' : '<i class="ti ti-check"></i> Ativar';
+  document.getElementById('modal-fornecedor').classList.add('open');
+}
+function toggleStatusForn() {
+  const id = document.getElementById('forn-id').value;
+  const f = DB.fornecedores.find(x=>x.id===id); if(!f) return;
+  f.status = f.status==='ativo' ? 'inativo' : 'ativo';
+  salvarLocal('fornecedores'); pushSheets('forn_update', f);
+  fecharModal('modal-fornecedor'); renderFornecedores();
+  showToast('Status atualizado', 'success');
 }
 
 function salvarConta() {
