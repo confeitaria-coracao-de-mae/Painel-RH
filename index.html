@@ -665,7 +665,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       <div class="form-group"><label class="form-label">Fornecedor</label><select class="form-select" id="conta-forn-sel"><option value="">— Selecione —</option></select></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Valor (R$)</label><input class="form-input" id="conta-valor" type="number" step="0.01" placeholder="0,00"></div>
+      <div class="form-group"><label class="form-label">Valor (R$)</label><input class="form-input" id="conta-valor" type="text" inputmode="decimal" placeholder="0,00"></div>
       <div class="form-group"><label class="form-label">Vencimento</label><input class="form-input" id="conta-venc" type="date"></div>
     </div>
     <div class="form-row">
@@ -1403,15 +1403,22 @@ function toggleRecorrencia(on) {
 function salvarConta() {
   const idExistente = document.getElementById('conta-id').value;
   const descBase = document.getElementById('conta-desc').value.trim();
+  if(!descBase) { showToast('Preencha a descrição','error'); return; }
   const recorrente = document.getElementById('conta-recorrente').checked;
   const parcelaAtual = parseInt(document.getElementById('conta-parcela-atual').value) || 1;
   const parcelaTotal = parseInt(document.getElementById('conta-parcela-total').value) || 1;
   const descricao = recorrente ? `${descBase} ${parcelaAtual}/${parcelaTotal}` : descBase;
+
+  // Sanitiza valor: aceita tanto 415.92 quanto 415,92
+  const valorRaw = document.getElementById('conta-valor').value.trim().replace(/\./g,'').replace(',','.');
+  const valorNum = parseFloat(valorRaw);
+  if(isNaN(valorNum) || valorNum <= 0) { showToast('Valor inválido — use vírgula para centavos (ex: 415,92)','error'); return; }
+
   const conta = {
     id: idExistente || gid(), descricao,
     desc_base: recorrente ? descBase : '',
     forn_id: document.getElementById('conta-forn-sel').value,
-    valor: document.getElementById('conta-valor').value,
+    valor: valorNum.toFixed(2),
     vencimento: document.getElementById('conta-venc').value,
     status: document.getElementById('conta-status').value,
     doc_link: document.getElementById('conta-doc').value.trim(),
@@ -1419,7 +1426,6 @@ function salvarConta() {
     parcela_atual: recorrente ? parcelaAtual : '',
     parcela_total: recorrente ? parcelaTotal : '',
   };
-  if(!descBase || !conta.valor) { showToast('Preencha descrição e valor','error'); return; }
   const idx = DB.contas.findIndex(c=>String(c.id)===String(conta.id));
   if(idx>=0) { DB.contas[idx]=conta; pushSheets('conta_update', conta); }
   else { DB.contas.push(conta); pushSheets('conta_add', conta); }
