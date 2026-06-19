@@ -648,7 +648,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
     <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="forn-email" type="email" placeholder="fornecedor@email.com"></div>
     <div class="form-group"><label class="form-label">Observações</label><textarea class="form-textarea" id="forn-obs" placeholder="Prazo de pagamento, condições especiais..."></textarea></div>
     <div class="modal-actions">
-      <button class="btn btn-danger btn-sm" id="forn-toggle-status-btn" style="display:none;margin-right:auto" onclick="toggleStatusForn()"></button>
+      <button class="btn btn-danger btn-sm" id="forn-excluir-btn" style="display:none;margin-right:auto"><i class="ti ti-trash"></i> Excluir</button>
+      <button class="btn btn-danger btn-sm" id="forn-toggle-status-btn" style="display:none"></button>
       <button class="btn btn-secondary" onclick="fecharModal('modal-fornecedor')">Cancelar</button>
       <button class="btn btn-primary" onclick="salvarFornecedor()"><i class="ti ti-check"></i> Salvar</button>
     </div>
@@ -659,18 +660,32 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
   <div class="modal" onclick="event.stopPropagation()">
     <h3>Lançar conta</h3>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Descrição</label><input class="form-input" id="conta-desc" placeholder="Ex: Boleto energia elétrica"></div>
+      <div class="form-group"><label class="form-label">Descrição</label><input class="form-input" id="conta-desc" placeholder="Ex: Parcela do Carro"></div>
       <div class="form-group"><label class="form-label">Fornecedor</label><select class="form-select" id="conta-forn-sel"><option value="">— Selecione —</option></select></div>
     </div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">Valor (R$)</label><input class="form-input" id="conta-valor" type="number" step="0.01" placeholder="0,00"></div>
-      <div class="form-group"><label class="form-label">Vencimento</label><input class="form-input" id="conta-venc" type="date"></div>
+      <div class="form-group"><label class="form-label">Vencimento (1ª parcela)</label><input class="form-input" id="conta-venc" type="date"></div>
     </div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">Status</label>
         <select class="form-select" id="conta-status"><option value="pendente">Pendente</option><option value="pago">Pago</option></select>
       </div>
       <div class="form-group"><label class="form-label">Link do documento</label><input class="form-input" id="conta-doc" placeholder="Link boleto/NF no Drive"></div>
+    </div>
+    <!-- RECORRÊNCIA -->
+    <div style="background:var(--surface2);border-radius:var(--r);padding:12px 14px;margin-top:4px">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:600">
+        <input type="checkbox" id="conta-recorrente" onchange="toggleRecorrencia(this.checked)" style="width:16px;height:16px;accent-color:var(--accent)">
+        Conta recorrente (parcelada ou mensal)
+      </label>
+      <div id="recorrencia-campos" style="display:none;margin-top:12px">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Parcela atual (nº)</label><input class="form-input" id="conta-parcela-atual" type="number" min="1" placeholder="Ex: 1"></div>
+          <div class="form-group"><label class="form-label">Total de parcelas</label><input class="form-input" id="conta-parcela-total" type="number" min="1" placeholder="Ex: 48"></div>
+        </div>
+        <p style="font-size:11px;color:var(--text3);margin-top:4px">Ao marcar como pago, a próxima parcela é criada automaticamente com vencimento +1 mês.</p>
+      </div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="fecharModal('modal-conta')">Cancelar</button>
@@ -1067,11 +1082,43 @@ function renderContas() {
 function marcarPago(id) {
   const idx = DB.contas.findIndex(c=>c.id===id);
   if(idx<0) return;
-  DB.contas[idx].status = DB.contas[idx].status==='pago' ? 'pendente' : 'pago';
+  const conta = DB.contas[idx];
+  conta.status = conta.status==='pago' ? 'pendente' : 'pago';
   salvarLocal('contas');
-  pushSheets('conta_update',DB.contas[idx]);
+  pushSheets('conta_update', conta);
+
+  if(conta.status==='pago' && conta.recorrente==='sim') {
+    const proxParcela = parseInt(conta.parcela_atual) + 1;
+    const total = parseInt(conta.parcela_total);
+    if(proxParcela <= total) {
+      const venc = new Date(conta.vencimento);
+      venc.setMonth(venc.getMonth() + 1);
+      const proxVenc = venc.toISOString().split('T')[0];
+      const proxConta = {
+        id: gid(),
+        descricao: `${conta.desc_base} ${proxParcela}/${total}`,
+        desc_base: conta.desc_base,
+        forn_id: conta.forn_id,
+        valor: conta.valor,
+        vencimento: proxVenc,
+        status: 'pendente',
+        doc_link: '',
+        recorrente: 'sim',
+        parcela_atual: proxParcela,
+        parcela_total: total,
+      };
+      DB.contas.push(proxConta);
+      salvarLocal('contas');
+      pushSheets('conta_add', proxConta);
+      showToast(`Parcela ${proxParcela}/${total} criada → vence ${new Date(proxVenc).toLocaleDateString('pt-BR')}`, 'success');
+    } else {
+      showToast('Última parcela paga! 🎉', 'success');
+    }
+  } else {
+    showToast(conta.status==='pago' ? 'Marcada como paga' : 'Reaberta como pendente', 'success');
+  }
   renderContas();
-  showToast(DB.contas[idx].status==='pago'?'Marcada como paga':'Reaberta como pendente','success');
+  atualizarBadges();
 }
 
 function renderTab(key) {
@@ -1137,9 +1184,18 @@ function abrirModalFornecedor() {
   document.getElementById('forn-id').value = '';
   ['forn-nome','forn-tel','forn-cnpj','forn-email','forn-obs'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('forn-toggle-status-btn').style.display = 'none';
+  document.getElementById('forn-excluir-btn').style.display = 'none';
   document.getElementById('modal-fornecedor').classList.add('open');
 }
-function abrirModalConta() { popularSelects(); document.getElementById('conta-venc').value=new Date().toISOString().split('T')[0]; ['conta-desc','conta-valor','conta-doc'].forEach(id=>document.getElementById(id).value=''); document.getElementById('modal-conta').classList.add('open'); }
+function abrirModalConta() {
+  popularSelects();
+  document.getElementById('conta-venc').value = new Date().toISOString().split('T')[0];
+  ['conta-desc','conta-valor','conta-doc','conta-parcela-atual','conta-parcela-total'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('conta-status').value = 'pendente';
+  document.getElementById('conta-recorrente').checked = false;
+  document.getElementById('recorrencia-campos').style.display = 'none';
+  document.getElementById('modal-conta').classList.add('open');
+}
 function abrirModalEscala() { showToast('Clique nas células da escala para trocar o turno'); }
 function fecharModal(id) { document.getElementById(id).classList.remove('open'); }
 
@@ -1254,7 +1310,9 @@ function salvarFornecedor() {
 }
 
 function editarForn(id) {
-  const f = DB.fornecedores.find(x=>x.id===id); if(!f) return;
+  // Busca por id exato, ou pelo índice se id vier como número do Sheets
+  let f = DB.fornecedores.find(x=>String(x.id)===String(id));
+  if(!f) return;
   document.getElementById('modal-forn-titulo').textContent = 'Editar fornecedor';
   document.getElementById('forn-id').value = f.id;
   document.getElementById('forn-nome').value = f.nome||'';
@@ -1266,7 +1324,18 @@ function editarForn(id) {
   const statusBtn = document.getElementById('forn-toggle-status-btn');
   statusBtn.style.display = 'inline-flex';
   statusBtn.innerHTML = f.status==='ativo' ? '<i class="ti ti-ban"></i> Inativar' : '<i class="ti ti-check"></i> Ativar';
+  const excluirBtn = document.getElementById('forn-excluir-btn');
+  excluirBtn.style.display = 'inline-flex';
+  excluirBtn.onclick = () => excluirForn(f.id);
   document.getElementById('modal-fornecedor').classList.add('open');
+}
+function excluirForn(id) {
+  if(!confirm('Excluir este fornecedor?')) return;
+  DB.fornecedores = DB.fornecedores.filter(f=>String(f.id)!==String(id));
+  salvarLocal('fornecedores');
+  pushSheets('forn_excluir', {id});
+  fecharModal('modal-fornecedor'); renderFornecedores(); popularSelects();
+  showToast('Fornecedor excluído', 'success');
 }
 function toggleStatusForn() {
   const id = document.getElementById('forn-id').value;
@@ -1277,17 +1346,30 @@ function toggleStatusForn() {
   showToast('Status atualizado', 'success');
 }
 
+function toggleRecorrencia(on) {
+  document.getElementById('recorrencia-campos').style.display = on ? 'block' : 'none';
+}
+
 function salvarConta() {
+  const descBase = document.getElementById('conta-desc').value.trim();
+  const recorrente = document.getElementById('conta-recorrente').checked;
+  const parcelaAtual = parseInt(document.getElementById('conta-parcela-atual').value) || 1;
+  const parcelaTotal = parseInt(document.getElementById('conta-parcela-total').value) || 1;
+  const descricao = recorrente ? `${descBase} ${parcelaAtual}/${parcelaTotal}` : descBase;
   const conta = {
-    id:gid(), descricao:document.getElementById('conta-desc').value.trim(),
-    forn_id:document.getElementById('conta-forn-sel').value,
-    valor:document.getElementById('conta-valor').value,
-    vencimento:document.getElementById('conta-venc').value,
-    status:document.getElementById('conta-status').value,
-    doc_link:document.getElementById('conta-doc').value.trim(),
+    id: gid(), descricao,
+    desc_base: recorrente ? descBase : '',
+    forn_id: document.getElementById('conta-forn-sel').value,
+    valor: document.getElementById('conta-valor').value,
+    vencimento: document.getElementById('conta-venc').value,
+    status: document.getElementById('conta-status').value,
+    doc_link: document.getElementById('conta-doc').value.trim(),
+    recorrente: recorrente ? 'sim' : '',
+    parcela_atual: recorrente ? parcelaAtual : '',
+    parcela_total: recorrente ? parcelaTotal : '',
   };
-  if(!conta.descricao||!conta.valor) { showToast('Preencha descrição e valor','error'); return; }
-  DB.contas.push(conta); salvarLocal('contas'); pushSheets('conta_add',conta);
+  if(!descBase || !conta.valor) { showToast('Preencha descrição e valor','error'); return; }
+  DB.contas.push(conta); salvarLocal('contas'); pushSheets('conta_add', conta);
   fecharModal('modal-conta'); renderContas();
   showToast('Conta lançada','success');
 }
