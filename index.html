@@ -725,7 +725,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 
 <div class="modal-overlay" id="modal-conta">
   <div class="modal" onclick="event.stopPropagation()">
-    <h3>Lançar conta</h3>
+    <h3 id="modal-conta-titulo">Lançar conta</h3>
+    <input type="hidden" id="conta-id">
     <div class="form-row">
       <div class="form-group"><label class="form-label">Descrição</label><input class="form-input" id="conta-desc" placeholder="Ex: Boleto energia elétrica"></div>
       <div class="form-group"><label class="form-label">Fornecedor</label><select class="form-select" id="conta-forn-sel"><option value="">— Selecione —</option></select></div>
@@ -741,6 +742,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       <div class="form-group"><label class="form-label">Link do documento</label><input class="form-input" id="conta-doc" placeholder="Link boleto/NF no Drive"></div>
     </div>
     <div class="modal-actions">
+      <button class="btn btn-danger btn-sm" id="conta-excluir-btn" style="display:none;margin-right:auto"><i class="ti ti-trash"></i> Excluir</button>
       <button class="btn btn-secondary" onclick="fecharModal('modal-conta')">Cancelar</button>
       <button class="btn btn-primary" onclick="salvarConta()"><i class="ti ti-check"></i> Salvar</button>
     </div>
