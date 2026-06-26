@@ -1566,13 +1566,14 @@ function toggleSecaoPagas() {
 }
 
 function marcarPago(id) {
-  const idx = DB.contas.findIndex(c=>c.id===id);
-  if(idx<0) return;
-  DB.contas[idx].status = DB.contas[idx].status==='pago' ? 'pendente' : 'pago';
+  const idx = DB.contas.findIndex(c => String(c.id) === String(id));
+  if(idx < 0) return;
+  const novoStatus = DB.contas[idx].status === 'pago' ? 'pendente' : 'pago';
+  DB.contas[idx].status = novoStatus;
   salvarLocal('contas');
-  pushSheets('conta_update',DB.contas[idx]);
-  renderContas();
-  showToast(DB.contas[idx].status==='pago'?'Marcada como paga':'Reaberta como pendente','success');
+  pushSheets('conta_update', DB.contas[idx]);
+  renderContas(); atualizarBadges();
+  showToast(novoStatus === 'pago' ? 'Marcada como paga ✓' : 'Reaberta como pendente', 'success');
 }
 
 function renderTab(key) {
@@ -1600,7 +1601,45 @@ function abrirModalOcorrencia() { popularSelects(); document.getElementById('oco
 function abrirModalPonto() { abrirEditarPonto(null, null); }
 function abrirModalDoc() { popularSelects(); document.getElementById('doc-data-inp').value=new Date().toISOString().split('T')[0]; document.getElementById('modal-doc').classList.add('open'); }
 function abrirModalFornecedor() { ['forn-nome','forn-tel','forn-cnpj','forn-email','forn-obs'].forEach(id=>document.getElementById(id).value=''); document.getElementById('modal-fornecedor').classList.add('open'); }
-function abrirModalConta() { popularSelects(); document.getElementById('conta-venc').value=new Date().toISOString().split('T')[0]; ['conta-desc','conta-valor','conta-doc'].forEach(id=>document.getElementById(id).value=''); document.getElementById('modal-conta').classList.add('open'); }
+function abrirModalConta() {
+  popularSelects();
+  document.getElementById('modal-conta-titulo').textContent = 'Lançar conta';
+  document.getElementById('conta-id').value = '';
+  document.getElementById('conta-venc').value = new Date().toISOString().split('T')[0];
+  ['conta-desc','conta-valor','conta-doc'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('conta-forn-sel').value = '';
+  document.getElementById('conta-status').value = 'pendente';
+  const excBtn = document.getElementById('conta-excluir-btn');
+  if(excBtn) excBtn.style.display = 'none';
+  document.getElementById('modal-conta').classList.add('open');
+}
+
+function editarConta(id) {
+  const c = DB.contas.find(x => String(x.id) === String(id));
+  if(!c) return;
+  popularSelects();
+  document.getElementById('modal-conta-titulo').textContent = 'Editar conta';
+  document.getElementById('conta-id').value = c.id;
+  document.getElementById('conta-desc').value = c.descricao || '';
+  document.getElementById('conta-forn-sel').value = c.forn_id || '';
+  document.getElementById('conta-valor').value = c.valor || '';
+  document.getElementById('conta-venc').value = c.vencimento || '';
+  document.getElementById('conta-status').value = c.status || 'pendente';
+  document.getElementById('conta-doc').value = c.doc_link || '';
+  const excBtn = document.getElementById('conta-excluir-btn');
+  if(excBtn) { excBtn.style.display = 'inline-flex'; excBtn.onclick = () => excluirConta(c.id); }
+  document.getElementById('modal-conta').classList.add('open');
+}
+
+function excluirConta(id) {
+  if(!confirm('Excluir esta conta?')) return;
+  DB.contas = DB.contas.filter(c => String(c.id) !== String(id));
+  salvarLocal('contas');
+  pushSheets('conta_excluir', { id });
+  fecharModal('modal-conta');
+  renderContas(); atualizarBadges();
+  showToast('Conta excluída', 'success');
+}
 function abrirModalEscala() { showToast('Clique nas células da escala para trocar o turno'); }
 function fecharModal(id) { document.getElementById(id).classList.remove('open'); }
 
@@ -1715,18 +1754,31 @@ function editarForn(id) {
 }
 
 function salvarConta() {
+  const idExistente = document.getElementById('conta-id').value;
   const conta = {
-    id:gid(), descricao:document.getElementById('conta-desc').value.trim(),
-    forn_id:document.getElementById('conta-forn-sel').value,
-    valor:document.getElementById('conta-valor').value,
-    vencimento:document.getElementById('conta-venc').value,
-    status:document.getElementById('conta-status').value,
-    doc_link:document.getElementById('conta-doc').value.trim(),
+    id: idExistente || gid(),
+    descricao: document.getElementById('conta-desc').value.trim(),
+    forn_id: document.getElementById('conta-forn-sel').value,
+    valor: document.getElementById('conta-valor').value,
+    vencimento: document.getElementById('conta-venc').value,
+    status: document.getElementById('conta-status').value,
+    doc_link: document.getElementById('conta-doc').value.trim(),
   };
-  if(!conta.descricao||!conta.valor) { showToast('Preencha descrição e valor','error'); return; }
-  DB.contas.push(conta); salvarLocal('contas'); pushSheets('conta_add',conta);
-  fecharModal('modal-conta'); renderContas();
-  showToast('Conta lançada','success');
+  if(!conta.descricao || !conta.valor) { showToast('Preencha descrição e valor','error'); return; }
+  const idx = DB.contas.findIndex(c => String(c.id) === String(conta.id));
+  if(idx >= 0) {
+    // Edição — preserva campos extras (recorrente, parcelas, etc)
+    DB.contas[idx] = { ...DB.contas[idx], ...conta };
+    pushSheets('conta_update', DB.contas[idx]);
+    showToast('Conta atualizada', 'success');
+  } else {
+    // Nova conta
+    DB.contas.push(conta);
+    pushSheets('conta_add', conta);
+    showToast('Conta lançada', 'success');
+  }
+  salvarLocal('contas');
+  fecharModal('modal-conta'); renderContas(); atualizarBadges();
 }
 
 // ============================================================
