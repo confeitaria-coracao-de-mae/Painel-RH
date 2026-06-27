@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gestão Interna — Manuele Estresada</title>
+<title>Gestão Interna — Coração de Mãe</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" rel="stylesheet">
 <style>
@@ -425,10 +425,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
     <!-- CONTAS A PAGAR -->
     <div class="tab-content" id="tab-contas">
       <div class="kpi-row kpi-row-4">
-        <div class="kpi"><div class="kpi-label">A pagar</div><div class="kpi-val red" id="kpi-conta-pendente">R$ —</div><div class="kpi-sub">total pendente</div></div>
-        <div class="kpi"><div class="kpi-label">Vence hoje</div><div class="kpi-val red" id="kpi-conta-hoje">R$ —</div><div class="kpi-sub">urgente</div></div>
-        <div class="kpi"><div class="kpi-label">Próx. 7 dias</div><div class="kpi-val orange" id="kpi-conta-semana">R$ —</div><div class="kpi-sub">a vencer</div></div>
-        <div class="kpi"><div class="kpi-label">Pago este mês</div><div class="kpi-val green" id="kpi-conta-pago">R$ —</div><div class="kpi-sub">confirmado</div></div>
+        <div class="kpi"><div class="kpi-label">Total do mês</div><div class="kpi-val red" id="kpi-conta-pendente">R$ —</div><div class="kpi-sub">pendente no mês atual</div></div>
+        <div class="kpi"><div class="kpi-label">Vencidas</div><div class="kpi-val red" id="kpi-conta-hoje">R$ —</div><div class="kpi-sub">já passaram da data</div></div>
+        <div class="kpi"><div class="kpi-label">Vencem em 7 dias</div><div class="kpi-val orange" id="kpi-conta-semana">R$ —</div><div class="kpi-sub">a partir de hoje</div></div>
+        <div class="kpi"><div class="kpi-label">Pago — 30 dias</div><div class="kpi-val green" id="kpi-conta-pago">R$ —</div><div class="kpi-sub">últimos 30 dias</div></div>
       </div>
       <div class="alert alert-warn" id="alerta-contas" style="display:none">
         <i class="ti ti-alert-circle"></i>
@@ -1007,23 +1007,47 @@ function renderFornecedores() {
 function renderContas() {
   const hoje = new Date(); hoje.setHours(0,0,0,0);
   const semana = new Date(hoje); semana.setDate(hoje.getDate()+7);
+  const trintaDiasAtras = new Date(hoje); trintaDiasAtras.setDate(hoje.getDate()-30);
+
   const pendentes = DB.contas.filter(c=>c.status!=='pago');
-  const totalPendente = pendentes.reduce((a,c)=>a+(parseFloat(c.valor)||0),0);
-  const venceHoje = pendentes.filter(c=>{ const d=new Date(c.vencimento); d.setHours(0,0,0,0); return d<=hoje; });
-  const venceSemana = pendentes.filter(c=>{ const d=new Date(c.vencimento); d.setHours(0,0,0,0); return d>hoje&&d<=semana; });
-  const pagos = DB.contas.filter(c=>c.status==='pago'&&new Date(c.vencimento).getMonth()===hoje.getMonth());
-  const totalPago = pagos.reduce((a,c)=>a+(parseFloat(c.valor)||0),0);
-  const totalHoje = venceHoje.reduce((a,c)=>a+(parseFloat(c.valor)||0),0);
+
+  // KPI 1: Total pendente do mês atual
+  const pendentesMes = pendentes.filter(c=>{
+    const d = new Date(c.vencimento);
+    return d.getFullYear()===hoje.getFullYear() && d.getMonth()===hoje.getMonth();
+  });
+  const totalPendente = pendentesMes.reduce((a,c)=>a+(parseFloat(c.valor)||0),0);
+
+  // KPI 2: Vencidas (já passaram da data, sem incluir hoje)
+  const vencidas = pendentes.filter(c=>{ const d=new Date(c.vencimento); d.setHours(0,0,0,0); return d<hoje; });
+  const totalVencidas = vencidas.reduce((a,c)=>a+(parseFloat(c.valor)||0),0);
+
+  // KPI 3: Vencem nos próximos 7 dias (a partir de hoje, sem as já vencidas)
+  const venceSemana = pendentes.filter(c=>{ const d=new Date(c.vencimento); d.setHours(0,0,0,0); return d>=hoje&&d<=semana; });
   const totalSemana = venceSemana.reduce((a,c)=>a+(parseFloat(c.valor)||0),0);
+
+  // KPI 4: Pago nos últimos 30 dias
+  const pagos30 = DB.contas.filter(c=>{ if(c.status!=='pago') return false; const d=new Date(c.vencimento); d.setHours(0,0,0,0); return d>=trintaDiasAtras&&d<=hoje; });
+  const totalPago = pagos30.reduce((a,c)=>a+(parseFloat(c.valor)||0),0);
+
+  // Alert: vencidas + vencem hoje
+  const venceHoje = pendentes.filter(c=>{ const d=new Date(c.vencimento); d.setHours(0,0,0,0); return d.getTime()===hoje.getTime(); });
+  const totalHoje = venceHoje.reduce((a,c)=>a+(parseFloat(c.valor)||0),0);
+
   document.getElementById('kpi-conta-pendente').textContent = 'R$ '+totalPendente.toLocaleString('pt-BR',{minimumFractionDigits:2});
-  document.getElementById('kpi-conta-hoje').textContent = 'R$ '+totalHoje.toLocaleString('pt-BR',{minimumFractionDigits:2});
+  document.getElementById('kpi-conta-hoje').textContent = 'R$ '+totalVencidas.toLocaleString('pt-BR',{minimumFractionDigits:2});
   document.getElementById('kpi-conta-semana').textContent = 'R$ '+totalSemana.toLocaleString('pt-BR',{minimumFractionDigits:2});
   document.getElementById('kpi-conta-pago').textContent = 'R$ '+totalPago.toLocaleString('pt-BR',{minimumFractionDigits:2});
 
   const alertEl = document.getElementById('alerta-contas');
-  if(venceHoje.length) {
+  const urgentes = [...vencidas, ...venceHoje];
+  const totalUrgente = vencidas.reduce((a,c)=>a+(parseFloat(c.valor)||0),0) + totalHoje;
+  if(vencidas.length || venceHoje.length) {
     alertEl.style.display='flex';
-    document.getElementById('alerta-contas-txt').textContent = `${venceHoje.length} conta${venceHoje.length>1?'s':''} vence${venceHoje.length>1?'m':''} hoje — Total: R$ ${totalHoje.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
+    const partes = [];
+    if(vencidas.length) partes.push(`${vencidas.length} vencida${vencidas.length>1?'s':''}`);
+    if(venceHoje.length) partes.push(`${venceHoje.length} vence${venceHoje.length>1?'m':''} hoje`);
+    document.getElementById('alerta-contas-txt').textContent = `${partes.join(' · ')} — Total: R$ ${totalUrgente.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
   } else alertEl.style.display='none';
 
   // ── Popular seletor de mês ──
