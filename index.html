@@ -178,6 +178,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .b-pago { background: #E8F7F1; color: var(--green); }
 .b-pendente { background: #FDF0E3; color: var(--orange); }
 .b-vence { background: #FAEAEA; color: var(--red); }
+.b-vencida { background: #B04040; color: white; }
+.b-vence-amanha { background: #FDF0E3; color: var(--orange); }
+.b-emdia { background: #E8F7F1; color: var(--green); }
 .b-ativo { background: #E8F7F1; color: var(--green); }
 .b-inativo { background: var(--surface2); color: var(--text3); }
 
@@ -265,12 +268,12 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
   <div class="nav-item active" onclick="goTab('funcionarias',this)"><i class="ti ti-users"></i> Funcionárias</div>
   <div class="nav-item" onclick="goTab('escala',this)"><i class="ti ti-calendar-week"></i> Escala</div>
   <div class="nav-item" onclick="goTab('ponto',this)"><i class="ti ti-clock"></i> Ponto</div>
-  <div class="nav-item" onclick="goTab('ocorrencias',this)"><i class="ti ti-alert-circle"></i> Ocorrências <span class="nav-badge" id="badge-ocorr" style="display:none"></span></div>
+  <div class="nav-item" onclick="goTab('ocorrencias',this)"><i class="ti ti-alert-circle"></i> Ocorrências <span class="nav-badge">3</span></div>
   <div class="nav-item" onclick="goTab('documentos',this)"><i class="ti ti-folder"></i> Documentos</div>
 
   <div class="nav-section">Financeiro</div>
   <div class="nav-item" onclick="goTab('fornecedores',this)"><i class="ti ti-building-store"></i> Fornecedores</div>
-  <div class="nav-item" onclick="goTab('contas',this)"><i class="ti ti-receipt"></i> Contas a Pagar <span class="nav-badge" id="badge-contas" style="display:none"></span></div>
+  <div class="nav-item" onclick="goTab('contas',this)"><i class="ti ti-receipt"></i> Contas a Pagar <span class="nav-badge">2</span></div>
 
   <div class="nav-section">Inteligência</div>
   <div class="nav-item" onclick="goTab('agente',this)"><i class="ti ti-robot"></i> Agente IA</div>
@@ -343,68 +346,20 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
     <!-- PONTO -->
     <div class="tab-content" id="tab-ponto">
       <div class="kpi-row kpi-row-4">
-        <div class="kpi"><div class="kpi-label">Horas previstas</div><div class="kpi-val" id="kpi-horas-prev">—</div><div class="kpi-sub">este mês</div></div>
+        <div class="kpi"><div class="kpi-label">Horas previstas</div><div class="kpi-val">312h</div><div class="kpi-sub">este mês</div></div>
         <div class="kpi"><div class="kpi-label">Trabalhadas</div><div class="kpi-val green" id="kpi-horas-trab">—</div><div class="kpi-sub">até hoje</div></div>
         <div class="kpi"><div class="kpi-label">Faltas</div><div class="kpi-val red" id="kpi-faltas-ponto">0</div><div class="kpi-sub">este mês</div></div>
         <div class="kpi"><div class="kpi-label">Atrasos</div><div class="kpi-val orange" id="kpi-atrasos-ponto">0</div><div class="kpi-sub">este mês</div></div>
       </div>
-
-      <!-- IMPORTADOR AFD -->
-      <div class="card" style="border:2px dashed var(--border);background:var(--surface2)">
-        <div class="card-head" style="margin-bottom:10px">
-          <span class="card-title" style="display:flex;align-items:center;gap:8px">
-            <i class="ti ti-file-upload" style="color:var(--accent);font-size:18px"></i>
-            Importar AFD — Henry Prisma
-          </span>
-          <span style="font-size:11px;color:var(--text3)">Arquivo .txt gerado via pendrive no relógio</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-          <label style="display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:white;padding:9px 16px;border-radius:var(--r);cursor:pointer;font-size:13px;font-weight:500">
-            <i class="ti ti-upload"></i> Selecionar arquivo AFD
-            <input type="file" id="afd-file-input" accept=".txt,.afd" style="display:none" onchange="importarAFD(this)">
-          </label>
-          <span id="afd-status" style="font-size:12px;color:var(--text3)">Nenhum arquivo selecionado</span>
-        </div>
-        <div id="afd-preview" style="display:none;margin-top:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px">
-          <div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--text2)">Preview — registros encontrados:</div>
-          <div id="afd-preview-content" style="font-size:12px;color:var(--text2);line-height:1.8;max-height:180px;overflow-y:auto"></div>
-          <div style="display:flex;gap:8px;margin-top:12px">
-            <button class="btn btn-primary btn-sm" onclick="confirmarImportacaoAFD()"><i class="ti ti-check"></i> Confirmar importação</button>
-            <button class="btn btn-secondary btn-sm" onclick="cancelarImportacaoAFD()"><i class="ti ti-x"></i> Cancelar</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- SEMANA ATUAL -->
       <div class="card">
         <div class="card-head">
-          <span class="card-title">Semana atual</span>
-          <button class="card-action" onclick="abrirModalPonto()"><i class="ti ti-plus"></i> Registrar manual</button>
+          <span class="card-title">Registro de ponto — semana atual</span>
+          <button class="card-action" onclick="abrirModalPonto()"><i class="ti ti-plus"></i> Registrar</button>
         </div>
         <div class="escala-wrap">
           <div class="ponto-grid" id="ponto-grid">
             <div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--text3)">Carregando registros...</div>
           </div>
-        </div>
-      </div>
-
-      <!-- HISTÓRICO MENSAL -->
-      <div class="card">
-        <div class="card-head">
-          <span class="card-title" style="display:flex;align-items:center;gap:8px">
-            <i class="ti ti-calendar-stats" style="color:var(--accent);font-size:16px"></i>
-            Histórico do mês
-          </span>
-          <div style="display:flex;gap:8px;align-items:center">
-            <select class="form-select" id="hist-func-sel" style="font-size:12px;padding:5px 10px;width:auto" onchange="renderHistorico()">
-              <option value="">Todas as funcionárias</option>
-            </select>
-            <select class="form-select" id="hist-mes-sel" style="font-size:12px;padding:5px 10px;width:auto" onchange="renderHistorico()"></select>
-            <button class="btn btn-secondary btn-sm" onclick="gerarRelatorioIA()"><i class="ti ti-robot"></i> Relatório IA</button>
-          </div>
-        </div>
-        <div id="historico-container">
-          <div style="text-align:center;padding:30px;color:var(--text3)">Selecione uma funcionária para ver o histórico.</div>
         </div>
       </div>
     </div>
@@ -451,10 +406,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 
     <!-- FORNECEDORES -->
     <div class="tab-content" id="tab-fornecedores">
-      <div class="kpi-row kpi-row-3">
+      <div class="kpi-row kpi-row-2">
         <div class="kpi"><div class="kpi-label">Total</div><div class="kpi-val" id="kpi-forn-total">0</div><div class="kpi-sub">cadastrados</div></div>
-        <div class="kpi"><div class="kpi-label">Ativos</div><div class="kpi-val green" id="kpi-forn-ativos">0</div><div class="kpi-sub">últimos 30 dias</div></div>
-        <div class="kpi"><div class="kpi-label">Gasto mensal</div><div class="kpi-val" id="kpi-forn-gasto">R$ —</div><div class="kpi-sub">média</div></div>
+        <div class="kpi"><div class="kpi-label">Ativos</div><div class="kpi-val green" id="kpi-forn-ativos">0</div><div class="kpi-sub">em operação</div></div>
       </div>
       <div class="card">
         <div class="card-head">
@@ -480,11 +434,19 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
         <i class="ti ti-alert-circle"></i>
         <span id="alerta-contas-txt"></span>
       </div>
-      <!-- PENDENTES -->
       <div class="card">
         <div class="card-head">
           <span class="card-title">Contas a pagar</span>
-          <button class="card-action" onclick="abrirModalConta()"><i class="ti ti-plus"></i> Lançar conta</button>
+          <div style="display:flex;align-items:center;gap:8px">
+            <select class="form-select" id="contas-filtro-mes" style="font-size:12px;padding:5px 10px;width:auto" onchange="renderContas()">
+            </select>
+            <select class="form-select" id="contas-filtro-status" style="font-size:12px;padding:5px 10px;width:auto" onchange="renderContas()">
+              <option value="urgentes">Vencidas + Amanhã</option>
+              <option value="pendentes">Todas pendentes</option>
+              <option value="todos">Todas</option>
+            </select>
+            <button class="card-action" onclick="abrirModalConta()"><i class="ti ti-plus"></i> Lançar conta</button>
+          </div>
         </div>
         <table class="fin-table">
           <thead><tr><th>Descrição</th><th>Fornecedor</th><th>Vencimento</th><th>Valor</th><th>Status</th><th>Doc</th><th></th></tr></thead>
@@ -508,7 +470,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
         <div id="contas-pagas-body" style="display:none">
           <table class="fin-table">
             <thead><tr><th>Descrição</th><th>Fornecedor</th><th>Vencimento</th><th>Valor</th><th>Status</th><th>Doc</th><th></th></tr></thead>
-            <tbody id="contas-pagas-tbody"><tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text3)">Carregando...</td></tr></tbody>
+            <tbody id="contas-pagas-tbody"></tbody>
           </table>
         </div>
       </div>
@@ -671,7 +633,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
     </div>
     <div class="form-group"><label class="form-label">Observação</label><input class="form-input" id="ponto-obs" placeholder="Opcional"></div>
     <div class="modal-actions">
-      <button class="btn btn-danger btn-sm" id="ponto-excluir-btn" style="display:none;margin-right:auto"><i class="ti ti-trash"></i> Excluir</button>
       <button class="btn btn-secondary" onclick="fecharModal('modal-ponto')">Cancelar</button>
       <button class="btn btn-primary" onclick="salvarPonto()"><i class="ti ti-check"></i> Salvar</button>
     </div>
@@ -742,7 +703,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       <div class="form-group"><label class="form-label">Link do documento</label><input class="form-input" id="conta-doc" placeholder="Link boleto/NF no Drive"></div>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-danger btn-sm" id="conta-excluir-btn" style="display:none;margin-right:auto"><i class="ti ti-trash"></i> Excluir</button>
+      <button class="btn btn-danger btn-sm" id="conta-excluir-btn" style="display:none;margin-right:auto" onclick="excluirContaAtual()"><i class="ti ti-trash"></i> Excluir</button>
       <button class="btn btn-secondary" onclick="fecharModal('modal-conta')">Cancelar</button>
       <button class="btn btn-primary" onclick="salvarConta()"><i class="ti ti-check"></i> Salvar</button>
     </div>
@@ -840,7 +801,7 @@ async function pushSheets(acao, dados) {
 const TAB_CONFIG = {
   funcionarias: { title:'Funcionárias', sub:'Equipe cadastrada', btn:'Nova funcionária', btnFn:'abrirModalFunc()' },
   escala:       { title:'Escala Semanal', sub:'Distribuição de turnos', btn:'Editar escala', btnFn:'abrirModalEscala()' },
-  ponto:        { title:'Controle de Ponto', sub:'Registros de entrada e saída', btn:'Registrar manual', btnFn:'abrirModalPonto()' },
+  ponto:        { title:'Controle de Ponto', sub:'Registros de entrada e saída', btn:'Registrar ponto', btnFn:'abrirModalPonto()' },
   ocorrencias:  { title:'Ocorrências', sub:'Faltas, atrasos, advertências e elogios', btn:'Registrar ocorrência', btnFn:'abrirModalOcorrencia()' },
   documentos:   { title:'Documentos', sub:'Arquivos por funcionária', btn:'Adicionar documento', btnFn:'abrirModalDoc()' },
   fornecedores: { title:'Fornecedores', sub:'Cadastro de fornecedores', btn:'Novo fornecedor', btnFn:'abrirModalFornecedor()' },
@@ -939,482 +900,36 @@ function toggleTurno(funcId, data, atual) {
   renderEscala();
 }
 
-// ============================================================
-// PONTO — AFD PARSER + HISTÓRICO + CÁLCULOS
-// ============================================================
-let afdParsed = []; // dados do AFD aguardando confirmação
-
-// Turno padrão da empresa: entrada 07:00, almoço 12:00-13:00, saída 18:00
-const TURNO_ENTRADA  = '07:00';
-const TURNO_SAIDA    = '18:00';
-const TOLERANCIA_MIN = 10; // minutos de tolerância para atraso
-
-function parseAFD(texto) {
-  // Formato AFD Portaria 1510: tipo 3 = marcação de ponto
-  // Posições fixas: tipo[0], NSR[1-9], PIS[10-21], data[22-29] AAAAMMDD, hora[30-33] HHMM
-  const linhas = texto.split('\n');
-  const registros = [];
-  linhas.forEach(linha => {
-    linha = linha.trim();
-    if (!linha || linha[0] !== '3') return;
-    try {
-      // Tenta formato posicional padrão AFD
-      const pis = linha.substring(9, 21).trim();
-      const dataStr = linha.substring(21, 29).trim(); // AAAAMMDD
-      const horaStr = linha.substring(29, 33).trim(); // HHMM
-      if (!pis || !dataStr || !horaStr || dataStr.length < 8) return;
-      const data = `${dataStr.substring(0,4)}-${dataStr.substring(4,6)}-${dataStr.substring(6,8)}`;
-      const hora = `${horaStr.substring(0,2)}:${horaStr.substring(2,4)}`;
-      if (isNaN(new Date(data).getTime())) return;
-      registros.push({ pis, data, hora });
-    } catch(e) {}
-  });
-  return registros;
-}
-
-function agruparBatidas(registros) {
-  // Agrupa por PIS + data, ordena batidas por hora
-  const mapa = {};
-  registros.forEach(r => {
-    const key = `${r.pis}__${r.data}`;
-    if (!mapa[key]) mapa[key] = { pis: r.pis, data: r.data, batidas: [] };
-    mapa[key].batidas.push(r.hora);
-  });
-  Object.values(mapa).forEach(m => m.batidas.sort());
-  return Object.values(mapa);
-}
-
-function calcularDia(batidas, turnoEntrada, turnoSaida) {
-  // Par 1=entrada, 2=saída almoço, 3=volta almoço, 4=saída
-  const b = batidas;
-  const entrada  = b[0] || null;
-  const saidaAlm = b[1] || null;
-  const voltaAlm = b[2] || null;
-  const saida    = b[3] || b[2] || null; // se só 2 batidas: entrada+saída direto
-
-  let minTrab = 0;
-  if (b.length >= 4) {
-    // Entrada→almoço + volta→saída
-    minTrab = diffMin(b[0], b[1]) + diffMin(b[2], b[3]);
-  } else if (b.length === 2) {
-    minTrab = diffMin(b[0], b[1]);
-  } else if (b.length === 3) {
-    // Faltou bater na volta ou na saída — conta o que tem
-    minTrab = diffMin(b[0], b[1]);
-  }
-
-  // Atraso: entrada depois do turno + tolerância
-  let atrasoMin = 0;
-  if (entrada) {
-    const diff = diffMin(turnoEntrada, entrada);
-    if (diff > TOLERANCIA_MIN) atrasoMin = diff;
-  }
-
-  // Hora extra: saída depois do turno padrão
-  let extraMin = 0;
-  const saidaReal = b[b.length - 1];
-  if (saidaReal) {
-    const diff = diffMin(turnoSaida, saidaReal);
-    if (diff > 0) extraMin = diff;
-  }
-
-  const situacao = b.length === 0 ? 'falta'
-    : atrasoMin > 0 ? 'atraso'
-    : 'ok';
-
-  return {
-    entrada: entrada || '',
-    saida_almoco: saidaAlm || '',
-    volta_almoco: voltaAlm || '',
-    saida: saidaReal || '',
-    horas_trabalhadas: minTrab,
-    atraso_min: atrasoMin,
-    hora_extra_min: extraMin,
-    situacao,
-  };
-}
-
-function diffMin(h1, h2) {
-  // Diferença em minutos entre dois horários HH:MM (h2 - h1)
-  if (!h1 || !h2) return 0;
-  const [a1, b1] = h1.split(':').map(Number);
-  const [a2, b2] = h2.split(':').map(Number);
-  return (a2 * 60 + b2) - (a1 * 60 + b1);
-}
-
-function minParaHora(min) {
-  if (min <= 0) return '0h00';
-  const h = Math.floor(Math.abs(min) / 60);
-  const m = Math.abs(min) % 60;
-  return `${h}h${String(m).padStart(2,'0')}`;
-}
-
-function importarAFD(input) {
-  const file = input.files[0];
-  if (!file) return;
-  document.getElementById('afd-status').textContent = `Lendo: ${file.name}...`;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const texto = e.target.result;
-    const registros = parseAFD(texto);
-    if (!registros.length) {
-      document.getElementById('afd-status').textContent = '❌ Nenhum registro encontrado. Verifique se é um AFD válido.';
-      return;
-    }
-    const grupos = agruparBatidas(registros);
-    afdParsed = grupos;
-
-    // Gera preview
-    const funcs = DB.funcionarias;
-    let preview = '';
-    let semCPF = new Set();
-    grupos.forEach(g => {
-      const func = funcs.find(f => (f.cpf||'').replace(/\D/g,'') === g.pis.replace(/\D/g,''));
-      const calc = calcularDia(g.batidas, TURNO_ENTRADA, TURNO_SAIDA);
-      const nome = func ? func.nome : `PIS ${g.pis} (não cadastrado)`;
-      if (!func) semCPF.add(g.pis);
-      const cor = calc.situacao === 'falta' ? 'var(--red)' : calc.situacao === 'atraso' ? 'var(--orange)' : 'var(--green)';
-      preview += `<div style="display:flex;gap:12px;padding:4px 0;border-bottom:1px solid var(--border)">
-        <span style="width:160px;font-weight:600">${nome}</span>
-        <span style="width:90px">${new Date(g.data+'T00:00:00').toLocaleDateString('pt-BR')}</span>
-        <span style="width:80px">${g.batidas.join(' / ')}</span>
-        <span style="width:70px">${minParaHora(calc.horas_trabalhadas)}</span>
-        <span style="color:${cor};font-weight:600">${calc.situacao === 'ok' ? '✓ Normal' : calc.situacao === 'atraso' ? `⚠ Atraso ${minParaHora(calc.atraso_min)}` : '✗ Falta'}</span>
-      </div>`;
-    });
-    if (semCPF.size) {
-      preview += `<div style="margin-top:8px;padding:8px;background:#FDF0E3;border-radius:6px;font-size:11px;color:var(--orange)">
-        ⚠ ${semCPF.size} PIS não encontrado(s) no cadastro. Cadastre o CPF/PIS nas funcionárias para cruzar corretamente.
-      </div>`;
-    }
-
-    document.getElementById('afd-preview-content').innerHTML = preview;
-    document.getElementById('afd-preview').style.display = 'block';
-    document.getElementById('afd-status').textContent = `✓ ${registros.length} batidas encontradas em ${grupos.length} registros (${grupos.length} dias/pessoas)`;
-  };
-  reader.readAsText(file, 'latin1');
-}
-
-function confirmarImportacaoAFD() {
-  if (!afdParsed.length) return;
-  let importados = 0, ignorados = 0;
-  afdParsed.forEach(g => {
-    const func = DB.funcionarias.find(f => (f.cpf||'').replace(/\D/g,'') === g.pis.replace(/\D/g,''));
-    if (!func) { ignorados++; return; }
-    const calc = calcularDia(g.batidas, TURNO_ENTRADA, TURNO_SAIDA);
-    const reg = {
-      id: gid(),
-      func_id: func.id,
-      data: g.data,
-      entrada: calc.entrada,
-      saida_almoco: calc.saida_almoco,
-      volta_almoco: calc.volta_almoco,
-      saida: calc.saida,
-      horas_trabalhadas: calc.horas_trabalhadas,
-      atraso_min: calc.atraso_min,
-      hora_extra_min: calc.hora_extra_min,
-      situacao: calc.situacao,
-      obs: `AFD importado`,
-      origem: 'afd',
-    };
-    // Upsert: substitui se já existe pra mesma func+data
-    const idx = DB.ponto.findIndex(p => p.func_id === func.id && p.data === g.data);
-    if (idx >= 0) DB.ponto[idx] = reg; else DB.ponto.push(reg);
-    importados++;
-  });
-  salvarLocal('ponto');
-  pushSheets('ponto_batch', { registros: DB.ponto.slice(-importados) });
-  cancelarImportacaoAFD();
-  renderPonto();
-  renderHistorico();
-  showToast(`✓ ${importados} registros importados${ignorados ? `, ${ignorados} ignorados (PIS não cadastrado)` : ''}`, 'success');
-}
-
-function cancelarImportacaoAFD() {
-  afdParsed = [];
-  document.getElementById('afd-preview').style.display = 'none';
-  document.getElementById('afd-status').textContent = 'Nenhum arquivo selecionado';
-  document.getElementById('afd-file-input').value = '';
-}
-
 function renderPonto() {
   const mes = new Date().getMonth();
-  const ano = new Date().getFullYear();
-  const pontoMes = DB.ponto.filter(p => {
-    const d = new Date(p.data+'T00:00:00');
-    return d.getMonth() === mes && d.getFullYear() === ano;
-  });
-  const faltas = pontoMes.filter(p => p.situacao === 'falta').length;
-  const atrasos = pontoMes.filter(p => p.situacao === 'atraso').length;
-  const totalMin = pontoMes.reduce((a,p) => a + (parseInt(p.horas_trabalhadas)||0), 0);
+  const faltas = DB.ponto.filter(p=>p.situacao==='falta'&&new Date(p.data).getMonth()===mes).length;
+  const atrasos = DB.ponto.filter(p=>p.situacao==='atraso'&&new Date(p.data).getMonth()===mes).length;
   document.getElementById('kpi-faltas-ponto').textContent = faltas;
   document.getElementById('kpi-atrasos-ponto').textContent = atrasos;
-  document.getElementById('kpi-horas-trab').textContent = minParaHora(totalMin);
+  const horas = DB.ponto.filter(p=>p.situacao==='ok'&&new Date(p.data).getMonth()===mes).length * 6;
+  document.getElementById('kpi-horas-trab').textContent = horas + 'h';
 
-  // Horas previstas: dias úteis do mês × 8h × funcionárias ativas
-  const funcsAtivas = DB.funcionarias.filter(f => f.status === 'ativo').length;
-  const diasUteis = calcularDiasUteisDoMes(ano, mes);
-  const prevMin = diasUteis * 8 * 60 * funcsAtivas;
-  document.getElementById('kpi-horas-prev').textContent = minParaHora(prevMin);
-
-  // Grid semanal
   const hoje = new Date();
   const semana = [];
   const seg = new Date(hoje); seg.setDate(hoje.getDate() - hoje.getDay() + 1);
-  for (let i = 0; i < 6; i++) { const d = new Date(seg); d.setDate(seg.getDate()+i); semana.push(d); }
-  const funcs = DB.funcionarias.filter(f => f.status === 'ativo');
+  for (let i=0;i<6;i++) { const d=new Date(seg); d.setDate(seg.getDate()+i); semana.push(d); }
+  const funcs = DB.funcionarias.filter(f=>f.status==='ativo');
   const grid = document.getElementById('ponto-grid');
-  let gridHtml = '<div class="pg-header">Funcionária</div>' + semana.map(d =>
-    `<div class="pg-header">${d.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit'})}</div>`
-  ).join('');
-  funcs.forEach(f => {
-    gridHtml += `<div class="pg-nome">${f.nome.split(' ')[0]}</div>`;
-    semana.forEach(d => {
-      const ds = d.toISOString().split('T')[0];
-      const reg = DB.ponto.find(p => p.func_id === f.id && p.data === ds);
-      const click = `onclick="abrirEditarPonto('${f.id}','${ds}')"`;
-      if (!reg) gridHtml += `<div class="pg-cell" style="cursor:pointer" ${click} title="Clique para registrar">+ reg</div>`;
-      else if (reg.situacao === 'falta') gridHtml += `<div class="pg-cell p-falta" style="cursor:pointer" ${click}>FALTA</div>`;
-      else if (reg.situacao === 'folga') gridHtml += `<div class="pg-cell p-folga" style="cursor:pointer" ${click}>Folga</div>`;
-      else if (reg.situacao === 'atraso') gridHtml += `<div class="pg-cell p-atraso" style="cursor:pointer" ${click}>${reg.entrada||'Atras'} <i class="ti ti-pencil" style="font-size:9px;opacity:0.5"></i></div>`;
-      else gridHtml += `<div class="pg-cell p-ok" style="cursor:pointer" ${click}>${reg.entrada||'OK'} <i class="ti ti-pencil" style="font-size:9px;opacity:0.5"></i></div>`;
+  let html = '<div class="pg-header">Funcionária</div>' + semana.map(d=>`<div class="pg-header">${d.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit'})}</div>`).join('');
+  funcs.forEach(f=>{
+    html+=`<div class="pg-nome">${f.nome.split(' ')[0]}</div>`;
+    semana.forEach(d=>{
+      const ds=d.toISOString().split('T')[0];
+      const reg=DB.ponto.find(p=>p.func_id===f.id&&p.data===ds);
+      if(!reg) html+='<div class="pg-cell">—</div>';
+      else if(reg.situacao==='falta') html+='<div class="pg-cell p-falta">FALTA</div>';
+      else if(reg.situacao==='folga') html+='<div class="pg-cell p-folga">Folga</div>';
+      else if(reg.situacao==='atraso') html+=`<div class="pg-cell p-atraso">${reg.entrada||'Atras'}</div>`;
+      else html+=`<div class="pg-cell p-ok">${reg.entrada||'OK'}</div>`;
     });
   });
-  grid.innerHTML = gridHtml;
-
-  // Populares selects do histórico
-  const histFunc = document.getElementById('hist-func-sel');
-  if (histFunc) {
-    const prev = histFunc.value;
-    histFunc.innerHTML = '<option value="">Todas as funcionárias</option>' +
-      DB.funcionarias.map(f => `<option value="${f.id}">${f.nome}</option>`).join('');
-    if (prev) histFunc.value = prev;
-  }
-  popularMesesHistorico();
-  renderHistorico();
+  grid.innerHTML = html;
 }
-
-function calcularDiasUteisDoMes(ano, mes) {
-  let count = 0;
-  const d = new Date(ano, mes, 1);
-  while (d.getMonth() === mes) {
-    const dow = d.getDay();
-    if (dow !== 0 && dow !== 6) count++;
-    d.setDate(d.getDate() + 1);
-  }
-  return count;
-}
-
-function popularMesesHistorico() {
-  const sel = document.getElementById('hist-mes-sel');
-  if (!sel) return;
-  const prev = sel.value;
-  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  const hoje = new Date();
-  let opts = '';
-  for (let i = 0; i < 6; i++) {
-    const d = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
-    const val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-    opts += `<option value="${val}">${meses[d.getMonth()]} ${d.getFullYear()}</option>`;
-  }
-  sel.innerHTML = opts;
-  if (prev) sel.value = prev;
-}
-
-function renderHistorico() {
-  const funcSel = document.getElementById('hist-func-sel')?.value || '';
-  const mesSel = document.getElementById('hist-mes-sel')?.value || '';
-  const container = document.getElementById('historico-container');
-  if (!container) return;
-
-  const [anoStr, mesStr] = mesSel.split('-');
-  const ano = parseInt(anoStr), mes = parseInt(mesStr) - 1;
-
-  let pontos = DB.ponto.filter(p => {
-    const d = new Date(p.data+'T00:00:00');
-    return d.getFullYear() === ano && d.getMonth() === mes;
-  });
-  if (funcSel) pontos = pontos.filter(p => p.func_id === funcSel);
-
-  if (!pontos.length) {
-    container.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text3)">Nenhum registro neste período.</div>';
-    return;
-  }
-
-  // Agrupa por funcionária
-  const porFunc = {};
-  pontos.forEach(p => {
-    if (!porFunc[p.func_id]) porFunc[p.func_id] = [];
-    porFunc[p.func_id].push(p);
-  });
-
-  let html = '';
-  Object.entries(porFunc).forEach(([fid, regs]) => {
-    const func = DB.funcionarias.find(f => f.id === fid);
-    const nome = func ? func.nome : '—';
-    const sorted = [...regs].sort((a,b) => a.data.localeCompare(b.data));
-    const totalMin = sorted.reduce((a,p) => a + (parseInt(p.horas_trabalhadas)||0), 0);
-    const totalAtrasoMin = sorted.reduce((a,p) => a + (parseInt(p.atraso_min)||0), 0);
-    const totalExtraMin = sorted.reduce((a,p) => a + (parseInt(p.hora_extra_min)||0), 0);
-    const faltas = sorted.filter(p => p.situacao === 'falta').length;
-    const atrasos = sorted.filter(p => p.situacao === 'atraso').length;
-
-    html += `<div style="margin-bottom:20px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid var(--border)">
-        <span style="font-weight:700;font-size:14px">${nome}</span>
-        <div style="display:flex;gap:16px;font-size:12px">
-          <span style="color:var(--green)"><b>${minParaHora(totalMin)}</b> trabalhadas</span>
-          <span style="color:var(--red)"><b>${faltas}</b> falta${faltas!==1?'s':''}</span>
-          <span style="color:var(--orange)"><b>${atrasos}</b> atraso${atrasos!==1?'s':''}</span>
-          ${totalAtrasoMin > 0 ? `<span style="color:var(--orange)"><b>${minParaHora(totalAtrasoMin)}</b> em atrasos</span>` : ''}
-          ${totalExtraMin > 0 ? `<span style="color:var(--blue)"><b>${minParaHora(totalExtraMin)}</b> extras</span>` : ''}
-        </div>
-      </div>
-      <table class="fin-table" style="font-size:12px">
-        <thead><tr>
-          <th>Data</th><th>Entrada</th><th>Saída Alm.</th><th>Volta</th><th>Saída</th>
-          <th>H. Trabalhadas</th><th>Atraso</th><th>H. Extra</th><th>Situação</th><th></th>
-        </tr></thead>
-        <tbody>
-          ${sorted.map(p => {
-            const cor = p.situacao==='falta'?'b-vence':p.situacao==='atraso'?'b-pendente':'b-pago';
-            const txt = p.situacao==='falta'?'Falta':p.situacao==='atraso'?'Atraso':'Normal';
-            const dt = new Date(p.data+'T00:00:00').toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'});
-            return `<tr>
-              <td>${dt}</td>
-              <td>${p.entrada||'—'}</td>
-              <td>${p.saida_almoco||'—'}</td>
-              <td>${p.volta_almoco||'—'}</td>
-              <td>${p.saida||'—'}</td>
-              <td style="font-weight:600">${p.horas_trabalhadas>0?minParaHora(parseInt(p.horas_trabalhadas)):'—'}</td>
-              <td style="color:var(--orange)">${p.atraso_min>0?minParaHora(parseInt(p.atraso_min)):'—'}</td>
-              <td style="color:var(--blue)">${p.hora_extra_min>0?minParaHora(parseInt(p.hora_extra_min)):'—'}</td>
-              <td><span class="badge ${cor}">${txt}</span></td>
-              <td><button class="btn btn-secondary btn-sm" onclick="abrirEditarPonto('${p.func_id}','${p.data}')" title="Editar"><i class="ti ti-edit"></i></button></td>
-            </tr>`;
-          }).join('')}
-        </tbody>
-      </table>
-    </div>`;
-  });
-  container.innerHTML = html;
-}
-
-// Modal editar ponto (já existia, mas agora com campos expandidos)
-function abrirEditarPonto(funcId, data) {
-  popularSelects();
-  const reg = funcId && data ? DB.ponto.find(p => p.func_id===funcId && p.data===data) : null;
-  const excluirBtn = document.getElementById('ponto-excluir-btn');
-  if (reg) {
-    document.getElementById('ponto-func-sel').value = reg.func_id;
-    document.getElementById('ponto-data-inp').value = reg.data;
-    document.getElementById('ponto-entrada').value = reg.entrada || '';
-    document.getElementById('ponto-saida').value = reg.saida || '';
-    document.getElementById('ponto-situacao').value = reg.situacao || 'ok';
-    document.getElementById('ponto-obs').value = reg.obs || '';
-    if (excluirBtn) { excluirBtn.style.display='inline-flex'; excluirBtn.onclick=()=>excluirPonto(funcId,data); }
-  } else {
-    document.getElementById('ponto-data-inp').value = data || new Date().toISOString().split('T')[0];
-    if (funcId) document.getElementById('ponto-func-sel').value = funcId;
-    ['ponto-entrada','ponto-saida','ponto-obs'].forEach(id=>document.getElementById(id).value='');
-    document.getElementById('ponto-situacao').value = 'ok';
-    if (excluirBtn) excluirBtn.style.display = 'none';
-  }
-  document.getElementById('modal-ponto').classList.add('open');
-}
-
-function excluirPonto(funcId, data) {
-  DB.ponto = DB.ponto.filter(p => !(p.func_id===funcId && p.data===data));
-  salvarLocal('ponto');
-  pushSheets('ponto_excluir', {func_id:funcId, data});
-  fecharModal('modal-ponto');
-  renderPonto();
-  showToast('Registro excluído', 'success');
-}
-
-async function gerarRelatorioIA() {
-  const apiKey = localStorage.getItem('cfg_api_key');
-  if (!apiKey) { showToast('Configure a chave da API Claude em Configurações','error'); return; }
-
-  const mesSel = document.getElementById('hist-mes-sel')?.value || '';
-  const funcSel = document.getElementById('hist-func-sel')?.value || '';
-  const [anoStr, mesStr] = mesSel.split('-');
-  const ano = parseInt(anoStr), mes = parseInt(mesStr) - 1;
-  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-
-  let pontos = DB.ponto.filter(p => {
-    const d = new Date(p.data+'T00:00:00');
-    return d.getFullYear()===ano && d.getMonth()===mes;
-  });
-  if (funcSel) pontos = pontos.filter(p => p.func_id===funcSel);
-
-  if (!pontos.length) { showToast('Sem dados para gerar relatório','error'); return; }
-
-  const container = document.getElementById('historico-container');
-  container.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text3)"><div class="typing" style="justify-content:center"><span></span><span></span><span></span></div><div style="margin-top:10px">Gerando relatório com IA...</div></div>';
-
-  // Monta resumo por funcionária
-  const porFunc = {};
-  pontos.forEach(p => {
-    if (!porFunc[p.func_id]) porFunc[p.func_id] = { regs: [] };
-    porFunc[p.func_id].regs.push(p);
-  });
-
-  let resumo = `Período: ${meses[mes]} ${ano}
-
-`;
-  Object.entries(porFunc).forEach(([fid, dados]) => {
-    const func = DB.funcionarias.find(f => f.id===fid);
-    const nome = func ? func.nome : fid;
-    const totalMin = dados.regs.reduce((a,p)=>a+(parseInt(p.horas_trabalhadas)||0),0);
-    const atrasoMin = dados.regs.reduce((a,p)=>a+(parseInt(p.atraso_min)||0),0);
-    const extraMin = dados.regs.reduce((a,p)=>a+(parseInt(p.hora_extra_min)||0),0);
-    const faltas = dados.regs.filter(p=>p.situacao==='falta').length;
-    const atrasos = dados.regs.filter(p=>p.situacao==='atraso').length;
-    resumo += `${nome}: ${dados.regs.length} dias registrados, ${minParaHora(totalMin)} trabalhadas, ${faltas} falta(s), ${atrasos} atraso(s), ${minParaHora(atrasoMin)} em atrasos, ${minParaHora(extraMin)} extras
-`;
-  });
-
-  const regras = localStorage.getItem('cfg_regras') || '';
-
-  try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json', 'x-api-key':apiKey, 'anthropic-version':'2023-06-01' },
-      body: JSON.stringify({
-        model:'claude-sonnet-4-6',
-        max_tokens:1200,
-        messages:[{ role:'user', content:
-          `Você é o assistente de RH da Confeitaria Coração de Mãe.
-
-Regras da empresa:
-${regras}
-
-Dados de ponto:
-${resumo}
-
-Gere um relatório mensal de ponto em português com:
-1. Resumo geral do mês
-2. Análise por funcionária (destaques positivos e pontos de atenção)
-3. Recomendações práticas para o gestor
-4. Impacto financeiro estimado (descontos por falta/atraso se aplicável)
-
-Seja direto e prático. Formato limpo, sem markdown pesado.`
-        }]
-      })
-    });
-    const data = await resp.json();
-    const texto = data.content[0]?.text || 'Não foi possível gerar o relatório.';
-    container.innerHTML = `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:20px;font-size:13px;line-height:1.8;white-space:pre-wrap">${texto}</div>
-    <div style="margin-top:12px;display:flex;gap:8px">
-      <button class="btn btn-secondary btn-sm" onclick="renderHistorico()"><i class="ti ti-table"></i> Voltar para tabela</button>
-    </div>`;
-  } catch(e) {
-    container.innerHTML = '<div style="color:var(--red);padding:20px">Erro ao gerar relatório: '+e.message+'</div>';
-    renderHistorico();
-  }
-}
-
 
 function renderOcorrencias() {
   const mes = new Date().getMonth();
@@ -1493,12 +1008,11 @@ function renderContas() {
   const hoje = new Date(); hoje.setHours(0,0,0,0);
   const semana = new Date(hoje); semana.setDate(hoje.getDate()+7);
   const pendentes = DB.contas.filter(c=>c.status!=='pago');
-  const pagas = DB.contas.filter(c=>c.status==='pago');
   const totalPendente = pendentes.reduce((a,c)=>a+(parseFloat(c.valor)||0),0);
   const venceHoje = pendentes.filter(c=>{ const d=new Date(c.vencimento); d.setHours(0,0,0,0); return d<=hoje; });
   const venceSemana = pendentes.filter(c=>{ const d=new Date(c.vencimento); d.setHours(0,0,0,0); return d>hoje&&d<=semana; });
-  const pagasMes = pagas.filter(c=>new Date(c.vencimento).getMonth()===hoje.getMonth());
-  const totalPago = pagasMes.reduce((a,c)=>a+(parseFloat(c.valor)||0),0);
+  const pagos = DB.contas.filter(c=>c.status==='pago'&&new Date(c.vencimento).getMonth()===hoje.getMonth());
+  const totalPago = pagos.reduce((a,c)=>a+(parseFloat(c.valor)||0),0);
   const totalHoje = venceHoje.reduce((a,c)=>a+(parseFloat(c.valor)||0),0);
   const totalSemana = venceSemana.reduce((a,c)=>a+(parseFloat(c.valor)||0),0);
   document.getElementById('kpi-conta-pendente').textContent = 'R$ '+totalPendente.toLocaleString('pt-BR',{minimumFractionDigits:2});
@@ -1512,13 +1026,42 @@ function renderContas() {
     document.getElementById('alerta-contas-txt').textContent = `${venceHoje.length} conta${venceHoje.length>1?'s':''} vence${venceHoje.length>1?'m':''} hoje — Total: R$ ${totalHoje.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
   } else alertEl.style.display='none';
 
+  // ── Popular seletor de mês ──
+  const selMes = document.getElementById('contas-filtro-mes');
+  if (selMes && selMes.options.length === 0) {
+    const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const hojeRef = new Date();
+    for (let i = -1; i < 5; i++) {
+      const d = new Date(hojeRef.getFullYear(), hojeRef.getMonth() + i, 1);
+      const val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+      const opt = document.createElement('option');
+      opt.value = val;
+      opt.textContent = `${meses[d.getMonth()]} ${d.getFullYear()}`;
+      if (i === 0) opt.selected = true;
+      selMes.appendChild(opt);
+    }
+  }
+  const mesFiltro = selMes ? selMes.value : null;
+  const statusFiltro = document.getElementById('contas-filtro-status')?.value || 'urgentes';
+  const amanha = new Date(hoje); amanha.setDate(hoje.getDate()+1);
+
   function buildRow(c) {
     const forn = DB.fornecedores.find(f=>f.id===c.forn_id);
     const dVenc = c.vencimento ? new Date(c.vencimento) : null;
     if(dVenc) dVenc.setHours(0,0,0,0);
-    const isVence = c.status!=='pago' && dVenc && dVenc<=hoje;
-    const badgeCls = c.status==='pago'?'b-pago':isVence?'b-vence':'b-pendente';
-    const badgeTxt = c.status==='pago'?'Pago':isVence?'Vence hoje':'Pendente';
+    const isVencida    = c.status!=='pago' && dVenc && dVenc < hoje;
+    const isVenceHoje  = c.status!=='pago' && dVenc && dVenc.getTime()===hoje.getTime();
+    const isVenceAmanha= c.status!=='pago' && dVenc && dVenc.getTime()===amanha.getTime();
+    const badgeCls = c.status==='pago' ? 'b-pago'
+      : isVencida     ? 'b-vencida'
+      : isVenceHoje   ? 'b-vence'
+      : isVenceAmanha ? 'b-vence-amanha'
+      : 'b-emdia';
+    const badgeTxt = c.status==='pago' ? 'Pago'
+      : isVencida     ? 'Vencida'
+      : isVenceHoje   ? 'Vence hoje'
+      : isVenceAmanha ? 'Vence amanhã'
+      : 'Em dia';
     const vencStr = dVenc && !isNaN(dVenc) ? dVenc.toLocaleDateString('pt-BR') : '—';
     return `<tr>
       <td style="font-weight:600">${c.descricao}</td>
@@ -1534,16 +1077,44 @@ function renderContas() {
     </tr>`;
   }
 
-  // ── PENDENTES ──
-  const contasPend = document.getElementById('contas-tbody');
-  const pendOrdenadas = [...pendentes].sort((a,b)=>new Date(a.vencimento)-new Date(b.vencimento));
-  if(!pendOrdenadas.length) {
-    contasPend.innerHTML='<tr><td colspan="7" style="text-align:center;padding:28px;color:var(--green)"><i class="ti ti-circle-check" style="font-size:24px;display:block;margin-bottom:6px"></i>Nenhuma conta pendente! ✓</td></tr>';
-  } else {
-    contasPend.innerHTML = pendOrdenadas.map(buildRow).join('');
+  // ── Filtrar por mês ──
+  let contasFiltradas = DB.contas;
+  if (mesFiltro) {
+    const [fAno, fMes] = mesFiltro.split('-').map(Number);
+    contasFiltradas = DB.contas.filter(c => {
+      if (!c.vencimento) return false;
+      const d = new Date(c.vencimento);
+      return d.getFullYear() === fAno && d.getMonth()+1 === fMes;
+    });
   }
 
-  // ── PAGAS ──
+  // ── Filtrar por status ──
+  let contasExibir;
+  if (statusFiltro === 'urgentes') {
+    contasExibir = contasFiltradas.filter(c => {
+      if (c.status === 'pago') return false;
+      const d = new Date(c.vencimento); d.setHours(0,0,0,0);
+      return d <= amanha;
+    });
+  } else if (statusFiltro === 'pendentes') {
+    contasExibir = contasFiltradas.filter(c => c.status !== 'pago');
+  } else {
+    contasExibir = contasFiltradas;
+  }
+
+  const pendOrdenadas = [...contasExibir].sort((a,b)=>new Date(a.vencimento)-new Date(b.vencimento));
+  const tbody = document.getElementById('contas-tbody');
+  if(!pendOrdenadas.length) {
+    const msg = statusFiltro === 'urgentes'
+      ? '<i class="ti ti-circle-check" style="font-size:24px;display:block;margin-bottom:6px"></i>Nenhuma conta vencida ou vencendo amanhã ✓'
+      : 'Nenhuma conta neste período.';
+    tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:28px;color:var(--green)">${msg}</td></tr>`;
+  } else {
+    tbody.innerHTML = pendOrdenadas.map(buildRow).join('');
+  }
+
+  // ── PAGAS (sempre mostra do mês filtrado) ──
+  const pagas = contasFiltradas.filter(c=>c.status==='pago');
   const pagasOrdenadas = [...pagas].sort((a,b)=>new Date(b.vencimento)-new Date(a.vencimento));
   const countEl = document.getElementById('contas-pagas-count');
   const toggleEl = document.getElementById('contas-pagas-toggle');
@@ -1552,19 +1123,11 @@ function renderContas() {
   const tbodyPagas = document.getElementById('contas-pagas-tbody');
   if(tbodyPagas) {
     if(!pagasOrdenadas.length) {
-      tbodyPagas.innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text3)">Nenhuma conta paga registrada.</td></tr>';
+      tbodyPagas.innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text3)">Nenhuma conta paga neste período.</td></tr>';
     } else {
       tbodyPagas.innerHTML = pagasOrdenadas.map(buildRow).join('');
     }
   }
-}
-
-function toggleSecaoPagas() {
-  const body = document.getElementById('contas-pagas-body');
-  const chevron = document.getElementById('contas-pagas-chevron');
-  const aberto = body.style.display !== 'none';
-  body.style.display = aberto ? 'none' : 'block';
-  if(chevron) chevron.style.transform = aberto ? 'rotate(0deg)' : 'rotate(180deg)';
 }
 
 function marcarPago(id) {
@@ -1576,6 +1139,42 @@ function marcarPago(id) {
   pushSheets('conta_update', DB.contas[idx]);
   renderContas(); atualizarBadges();
   showToast(novoStatus === 'pago' ? 'Marcada como paga ✓' : 'Reaberta como pendente', 'success');
+}
+
+function toggleSecaoPagas() {
+  const body = document.getElementById('contas-pagas-body');
+  const chevron = document.getElementById('contas-pagas-chevron');
+  const aberto = body.style.display !== 'none';
+  body.style.display = aberto ? 'none' : 'block';
+  if(chevron) chevron.style.transform = aberto ? 'rotate(0deg)' : 'rotate(180deg)';
+}
+
+function editarConta(id) {
+  const c = DB.contas.find(x => String(x.id) === String(id));
+  if(!c) return;
+  popularSelects();
+  document.getElementById('modal-conta-titulo').textContent = 'Editar conta';
+  document.getElementById('conta-id').value = c.id;
+  document.getElementById('conta-desc').value = c.descricao || '';
+  document.getElementById('conta-forn-sel').value = c.forn_id || '';
+  document.getElementById('conta-valor').value = c.valor || '';
+  document.getElementById('conta-venc').value = c.vencimento || '';
+  document.getElementById('conta-status').value = c.status || 'pendente';
+  document.getElementById('conta-doc').value = c.doc_link || '';
+  const excBtn = document.getElementById('conta-excluir-btn');
+  if(excBtn) { excBtn.style.display = 'inline-flex'; excBtn.onclick = () => excluirContaAtual(); }
+  document.getElementById('modal-conta').classList.add('open');
+}
+
+function excluirContaAtual() {
+  const id = document.getElementById('conta-id').value;
+  if(!id || !confirm('Excluir esta conta?')) return;
+  DB.contas = DB.contas.filter(c => String(c.id) !== String(id));
+  salvarLocal('contas');
+  pushSheets('conta_excluir', { id });
+  fecharModal('modal-conta');
+  renderContas(); atualizarBadges();
+  showToast('Conta excluída', 'success');
 }
 
 function renderTab(key) {
@@ -1600,7 +1199,7 @@ function popularSelects() {
 // ============================================================
 function abrirModalFunc() { document.getElementById('modal-func-titulo').textContent='Nova funcionária'; document.getElementById('func-id').value=''; ['func-nome','func-cpf','func-tel','func-obs','func-salario'].forEach(id=>document.getElementById(id).value=''); document.getElementById('func-admissao').value=new Date().toISOString().split('T')[0]; document.getElementById('modal-func').classList.add('open'); }
 function abrirModalOcorrencia() { popularSelects(); document.getElementById('ocorr-data-inp').value=new Date().toISOString().split('T')[0]; document.getElementById('modal-ocorrencia').classList.add('open'); }
-function abrirModalPonto() { abrirEditarPonto(null, null); }
+function abrirModalPonto() { popularSelects(); document.getElementById('ponto-data-inp').value=new Date().toISOString().split('T')[0]; document.getElementById('modal-ponto').classList.add('open'); }
 function abrirModalDoc() { popularSelects(); document.getElementById('doc-data-inp').value=new Date().toISOString().split('T')[0]; document.getElementById('modal-doc').classList.add('open'); }
 function abrirModalFornecedor() { ['forn-nome','forn-tel','forn-cnpj','forn-email','forn-obs'].forEach(id=>document.getElementById(id).value=''); document.getElementById('modal-fornecedor').classList.add('open'); }
 function abrirModalConta() {
@@ -1614,33 +1213,6 @@ function abrirModalConta() {
   const excBtn = document.getElementById('conta-excluir-btn');
   if(excBtn) excBtn.style.display = 'none';
   document.getElementById('modal-conta').classList.add('open');
-}
-
-function editarConta(id) {
-  const c = DB.contas.find(x => String(x.id) === String(id));
-  if(!c) return;
-  popularSelects();
-  document.getElementById('modal-conta-titulo').textContent = 'Editar conta';
-  document.getElementById('conta-id').value = c.id;
-  document.getElementById('conta-desc').value = c.descricao || '';
-  document.getElementById('conta-forn-sel').value = c.forn_id || '';
-  document.getElementById('conta-valor').value = c.valor || '';
-  document.getElementById('conta-venc').value = c.vencimento || '';
-  document.getElementById('conta-status').value = c.status || 'pendente';
-  document.getElementById('conta-doc').value = c.doc_link || '';
-  const excBtn = document.getElementById('conta-excluir-btn');
-  if(excBtn) { excBtn.style.display = 'inline-flex'; excBtn.onclick = () => excluirConta(c.id); }
-  document.getElementById('modal-conta').classList.add('open');
-}
-
-function excluirConta(id) {
-  if(!confirm('Excluir esta conta?')) return;
-  DB.contas = DB.contas.filter(c => String(c.id) !== String(id));
-  salvarLocal('contas');
-  pushSheets('conta_excluir', { id });
-  fecharModal('modal-conta');
-  renderContas(); atualizarBadges();
-  showToast('Conta excluída', 'success');
 }
 function abrirModalEscala() { showToast('Clique nas células da escala para trocar o turno'); }
 function fecharModal(id) { document.getElementById(id).classList.remove('open'); }
@@ -1769,12 +1341,10 @@ function salvarConta() {
   if(!conta.descricao || !conta.valor) { showToast('Preencha descrição e valor','error'); return; }
   const idx = DB.contas.findIndex(c => String(c.id) === String(conta.id));
   if(idx >= 0) {
-    // Edição — preserva campos extras (recorrente, parcelas, etc)
     DB.contas[idx] = { ...DB.contas[idx], ...conta };
     pushSheets('conta_update', DB.contas[idx]);
     showToast('Conta atualizada', 'success');
   } else {
-    // Nova conta
     DB.contas.push(conta);
     pushSheets('conta_add', conta);
     showToast('Conta lançada', 'success');
@@ -1796,16 +1366,6 @@ function buildContexto() {
   const mes = new Date().getMonth();
   const ocorrMes = DB.ocorrencias.filter(o=>new Date(o.data).getMonth()===mes);
   const ocorrResume = ocorrMes.map(o=>{ const f=DB.funcionarias.find(x=>x.id===o.func_id); return `- ${f?f.nome:'?'}: ${o.tipo} em ${o.data}${o.descricao?' — '+o.descricao:''}`; }).join('\n');
-  const mes2 = new Date().getMonth();
-  const pontoMes = DB.ponto.filter(p=>new Date(p.data+'T00:00:00').getMonth()===mes2);
-  const pontoResume = DB.funcionarias.map(f=>{
-    const regs = pontoMes.filter(p=>p.func_id===f.id);
-    if(!regs.length) return null;
-    const faltas = regs.filter(p=>p.situacao==='falta').length;
-    const atrasos = regs.filter(p=>p.situacao==='atraso').length;
-    const totalMin = regs.reduce((a,p)=>a+(parseInt(p.horas_trabalhadas)||0),0);
-    return `- ${f.nome}: ${regs.length} dias, ${minParaHora(totalMin)} trabalhadas, ${faltas} falta(s), ${atrasos} atraso(s)`;
-  }).filter(Boolean).join('\n');
   const constasPend = DB.contas.filter(c=>c.status!=='pago');
   const contasResume = constasPend.map(c=>{ const f=DB.fornecedores.find(x=>x.id===c.forn_id); return `- ${c.descricao} (${f?f.nome:'sem fornecedor'}): R$ ${c.valor}, vence ${c.vencimento}`; }).join('\n');
 
@@ -1820,9 +1380,6 @@ ${funcsResume || 'Nenhuma cadastrada ainda.'}
 
 === OCORRÊNCIAS DESTE MÊS ===
 ${ocorrResume || 'Nenhuma ocorrência registrada.'}
-
-=== PONTO DESTE MÊS ===
-${pontoResume || 'Nenhum registro de ponto este mês.'}
 
 === CONTAS A PAGAR PENDENTES ===
 ${contasResume || 'Nenhuma conta pendente.'}
@@ -1933,6 +1490,16 @@ function enviarChip(el) {
 }
 
 // ============================================================
+// UTILS
+// ============================================================
+function showToast(msg, tipo='') {
+  const t = document.getElementById('toast');
+  t.textContent=msg; t.className='toast '+(tipo==='success'?'success':tipo==='error'?'error':'');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ============================================================
 // BADGES SIDEBAR
 // ============================================================
 function atualizarBadges() {
@@ -1943,19 +1510,14 @@ function atualizarBadges() {
   if(badgeOcorr) { if(alertasOcorr>0){badgeOcorr.textContent=alertasOcorr;badgeOcorr.style.display='inline';}else badgeOcorr.style.display='none'; }
 
   const hoje = new Date(); hoje.setHours(0,0,0,0);
-  const contasUrg = DB.contas.filter(c=>{if(c.status==='pago')return false;const d=new Date(c.vencimento);d.setHours(0,0,0,0);return d<=hoje;}).length;
+  const amanha = new Date(hoje); amanha.setDate(hoje.getDate()+1);
+  const contasUrg = DB.contas.filter(c=>{
+    if(c.status==='pago') return false;
+    const d=new Date(c.vencimento); d.setHours(0,0,0,0);
+    return d<=amanha;
+  }).length;
   const badgeContas = document.getElementById('badge-contas');
   if(badgeContas) { if(contasUrg>0){badgeContas.textContent=contasUrg;badgeContas.style.display='inline';}else badgeContas.style.display='none'; }
-}
-
-// ============================================================
-// UTILS
-// ============================================================
-function showToast(msg, tipo='') {
-  const t = document.getElementById('toast');
-  t.textContent=msg; t.className='toast '+(tipo==='success'?'success':tipo==='error'?'error':'');
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2800);
 }
 
 // ============================================================
